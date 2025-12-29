@@ -1,0 +1,75 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+@font-face {
+  font-family: "Solbera Imitation";
+  src: local('Solbera Imitation'),
+  url('./assets/fonts/solbera-imitation/SolberaImitationTestUnmarkedWeb-Regular.woff2')format("woff2"),
+  url('./assets/fonts/solbera-imitation/SolberaImitationTestUnmarkedWeb-Regular.woff')format("woff");
+
+}
+@font-face {
+  font-family: "方正吕建德行楷";
+  src: local('方正吕建德行楷'),
+  url('./assets/fonts/FangZhengZiJi-LvJianDeXingKaiFanTi.ttf')format("truetype");
+
+}
+
+@font-face {
+  font-family: "Nodesto Caps Condensed";
+  src: local('Nodesto Caps Condensed'),
+  url("https://db.onlinewebfonts.com/t/c391b9f3d65d9f9e311c80d964b696e1.eot?#iefix")format("embedded-opentype"),
+  url("https://db.onlinewebfonts.com/t/c391b9f3d65d9f9e311c80d964b696e1.woff2")format("woff2"),
+  url("https://db.onlinewebfonts.com/t/c391b9f3d65d9f9e311c80d964b696e1.woff")format("woff"),
+  url("https://db.onlinewebfonts.com/t/c391b9f3d65d9f9e311c80d964b696e1.ttf")format("truetype"),
+  url("https://db.onlinewebfonts.com/t/c391b9f3d65d9f9e311c80d964b696e1.svg#Nodesto Caps Condensed")format("svg");
+}
+
