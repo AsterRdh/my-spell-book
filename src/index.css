@@ -73,3 +73,9 @@ button:focus-visible {
   url("https://db.onlinewebfonts.com/t/c391b9f3d65d9f9e311c80d964b696e1.svg#Nodesto Caps Condensed")format("svg");
 }
 
+@font-face {
+  font-family: "霞鹜文楷";
+  src: local('霞鹜文楷'),
+  url('./assets/fonts/LXGWWenKai-Medium.ttf')format("truetype");
+
+}

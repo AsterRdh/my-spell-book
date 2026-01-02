@@ -8,11 +8,18 @@ export type SpellType={
     needVerbal:boolean,
     needSomatic:boolean,
     needMaterial:boolean,
-    material:string,
+    material?:string,
+    duration:string
+    durationPS?:string
+    range:string
+    rangePS?:string
+    castingTime: string,
+    castingTimePS?: string
+    isRituals?:boolean
     baseDescription:string,
     upgradeDescription:string,
-    img:string,
-    fromBook:BookType
+    img?:string,
+    fromBook?:BookType
 }
 
 export type SpellSchoolType={
@@ -28,7 +35,7 @@ export type BookType={
     engName:string,
     source:string,
     groupName:string,
-    published:Date,
+    published:string,
     author:string,
     cover:string,
 }
