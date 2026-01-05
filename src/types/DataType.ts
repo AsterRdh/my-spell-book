@@ -4,7 +4,7 @@ export type SpellType={
     name:string,
     cnName:string,
     level:number,
-    school:SpellSchoolType,
+    school:string,
     needVerbal:boolean,
     needSomatic:boolean,
     needMaterial:boolean,
@@ -19,7 +19,7 @@ export type SpellType={
     baseDescription:string,
     upgradeDescription:string,
     img?:string,
-    fromBook?:BookType
+    fromBook?:string
 }
 
 export type SpellSchoolType={

@@ -55,7 +55,7 @@
 .app-right{
   width: 35vw;
   min-width: 400px;
-  padding: 2rem;
+
   border-left: #2c2c2c 2px solid;
   overflow: hidden;
   display: flex;

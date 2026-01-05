@@ -1,28 +1,43 @@
 import './App.css'
-import {Button, Checkbox, Col, Form, Input, InputNumber, Modal, Row, Space} from "antd";
+import {Button, Col, Form, Input, Modal, Row, Slider, Space, Spin} from "antd";
 import {useForm} from "antd/es/form/Form";
 import type {SpellType} from "./types/DataType.ts";
-import {defaultBook, schoolsOptions, TestData} from "./data/TestData.ts";
+import {bookOptions, books, defaultBook, schoolOptions, schools, TestData} from "./data/TestData.ts";
 import SpellCard from "./compoments/SpellCard.tsx";
-import SchoolSelect from "./compoments/SchoolSelect.tsx";
 import html2canvas from 'html2canvas';
 import {useRef, useState} from "react";
 import useNotification from "antd/es/notification/useNotification";
+import SpellForm from "./compoments/SpellForm.tsx";
 function App() {
 
     const [form] = useForm<SpellType>();
     const spellValues = Form.useWatch([], form);
     const [notification, message] = useNotification();
+    const [loading, setLoading] = useState(false)
 
-
-    const canvasRef = useRef(null);
+    const canvasRef = useRef<HTMLDivElement>(null);
     const handleConvert = () => {
         if (canvasRef.current){
-            html2canvas(canvasRef.current, {useCORS: true,}).then((canvas) => {
+            setLoading(true)
+            // 创建一个临时容器，不包含缩放效果
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.transform = 'scale(1)';
+            document.body.appendChild(tempContainer);
+
+            // 克隆 SpellCard 组件内容到临时容器
+            const clonedComponent = canvasRef.current.cloneNode(true) as HTMLElement;
+            tempContainer.appendChild(clonedComponent);
+            html2canvas(clonedComponent, {useCORS: true,}).then((canvas) => {
                 const link = document.createElement("a");
                 link.download = (spellValues.name||'spell')+" "+(spellValues.cnName||'法术')+ ".png";
                 link.href = canvas.toDataURL("image/png");
                 link.click();
+                // 清理临时元素
+                document.body.removeChild(tempContainer);
+            }).finally(()=>{
+                setLoading(false)
             });
         }
     };
@@ -78,7 +93,7 @@ function App() {
                 schoolStr = line2[1]
             }
             schoolStr = schoolStr.substring(0,2);
-            const school = schoolsOptions.find(s=>s.name === schoolStr) || schoolsOptions[0];
+            const school = schools[schoolStr]||schoolOptions[0].data;
 
             const time=lines.find((line,index)=>{
                 if (line.startsWith('施法时间：')){
@@ -141,7 +156,7 @@ function App() {
                 name: name,
                 cnName: cnName,
                 level: level,
-                school: school,
+                school: school.id,
                 castingTime: castingTime,
                 range: rangeStr,
                 duration: durationStr,
@@ -151,7 +166,7 @@ function App() {
                 material: materialStr,
                 baseDescription: description.join('\n\n'),
                 upgradeDescription: upgradeStr,
-                fromBook: {...defaultBook}
+                fromBook:defaultBook.id
             }
             form.setFieldsValue(spell)
             setOpenImportModal(false)
@@ -164,110 +179,56 @@ function App() {
 
     }
 
+    const [scale, setScale] = useState(100)
+
     return (
       <div className={'app'}>
         <div className={'app-left'}>
             <div className={'view'}>
-                <div className={'pre-view'}>
-                  <SpellCard spell={spellValues} ref={canvasRef}/>
+                <div className={'pre-view'} style={{transform:"scale("+(scale/100)+")"}}>
+                  <SpellCard spell={spellValues} ref={canvasRef}
+                             dataSet={{
+                                 schools:schools,
+                                 books:books
+                             }}
+                  />
                 </div>
             </div>
             <div>
-            1
+                <Row>
+                    <Col flex={"auto"}/>
+                    <Col>
+                       <Space>
+                           缩放
+                           <Slider style={{width:200}} value={scale} onChange={(value)=>setScale(value)} max={100} min={25}/>
+                           <div style={{width:'3rem',textAlign:"right"}}>
+                               {scale}%
+                           </div>
+                       </Space>
+                    </Col>
+
+                </Row>
             </div>
         </div>
         <div className={'app-right'}>
-            <div style={{textAlign: 'right',marginBottom: '1rem'}}>
+            <div style={{textAlign: 'right',padding:'24px'}}>
                 <Space>
                     <Button onClick={()=>{setOpenImportModal(true)}}>
                         快速导入
                     </Button>
                     <Button onClick={handleConvert}>
-                        转换
+                        导出为图片
                     </Button>
                 </Space>
             </div>
-            <div style={{flex: 1, overflowY: 'scroll',overflowX: 'hidden'}}>
-                <Form<SpellType> form={form} initialValues={TestData}>
-                    <Form.Item label="法术名称" name={'name'}>
-                        <Input/>
-                    </Form.Item>
-                    <Form.Item label="法术中文名称" name={'cnName'}>
-                        <Input/>
-                    </Form.Item>
-                    <Space>
-                        <Form.Item label="法术等级" name={'level'}>
-                            <InputNumber/>
-                        </Form.Item>
-                        <Form.Item label="法术学派" name={'school'}>
-                            <SchoolSelect/>
-                        </Form.Item>
-                    </Space>
-                    <Row gutter={12}>
-                        <Col span={8}>
-                            <Form.Item label="施法时间" name={'castingTime'}>
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                        <Col span={16}>
-                            <Form.Item  name={'castingTimePS'} noStyle>
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                    </Row>
+            <div style={{flex: 1, overflowY: 'scroll',overflowX: 'hidden',padding:'0 24px'}}>
+                <SpellForm
+                    form={form}
+                    schoolOptions={schoolOptions}
+                    bookOptions={bookOptions}
+                    initialValues={TestData}
+                />
 
-                    <Row gutter={12}>
-                        <Col span={8}>
-                            <Form.Item label="施法距离" name={'range'}>
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                        <Col span={16}>
-                            <Form.Item  name={'rangePS'} noStyle>
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-
-                    <Form.Item label="法术成分">
-                        <Space>
-                            <Form.Item label="V" name={'needVerbal'} valuePropName={'checked'} >
-                                <Checkbox />
-                            </Form.Item>
-                            <Form.Item label="S" name={'needSomatic'} valuePropName={'checked'}>
-                                <Checkbox />
-                            </Form.Item>
-                            <Form.Item label="M" name={'needMaterial'} valuePropName={'checked'}>
-                                <Checkbox />
-                            </Form.Item>
-                        </Space>
-
-                        <Form.Item label="材料" name={'material'} dependencies={['needMaterial']} hidden={!spellValues?.needMaterial}>
-                            <Input/>
-                        </Form.Item>
-                    </Form.Item>
-
-                    <Row gutter={12}>
-                        <Col span={8}>
-                            <Form.Item label="持续时间" name={'duration'}>
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                        <Col span={16}>
-                            <Form.Item  name={'durationPS'} noStyle>
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-
-                    <Form.Item label="法术描述" name={'baseDescription'} layout={'vertical'}>
-                        <Input.TextArea/>
-                    </Form.Item>
-                    <Form.Item label="法术升级描述" name={'upgradeDescription'} layout={'vertical'}>
-                        <Input.TextArea/>
-                    </Form.Item>
-
-                </Form>
             </div>
         </div>
           <Modal title="快速导入"
@@ -284,6 +245,7 @@ function App() {
               </div>
           </Modal>
           {message}
+          <Spin fullscreen={true} spinning={loading}/>
       </div>
     )
 }

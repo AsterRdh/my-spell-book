@@ -1,4 +1,4 @@
-import type {SpellType} from "../types/DataType.ts";
+import type {BookType, SpellSchoolType, SpellType} from "../types/DataType.ts";
 import {GiArcheryTarget, GiChest, GiClockwork, GiLips, GiSandsOfTime, GiSensuousness} from "react-icons/gi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -17,10 +17,15 @@ import {
 
 type SpellCardProps = {
     spell?:SpellType
+    dataSet:{
+        schools:{[key:string]:SpellSchoolType}
+        books:{[key:string]:BookType};
+    }
+ 
 }
 
 const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
-    const {spell} = props;
+    const {spell,dataSet:{schools,books}} = props;
     const spellCardTitle = useMemo(() => {
         if (!spell) return ['', ''];
         return [
@@ -30,7 +35,10 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
     }, [spell]);
 
     const schoolIcon = useMemo(() => {
-        switch(spell?.school?.id){
+        if(!spell || !spell.school) return <></>
+        const schoolData = schools[spell.school]
+        if (!schoolData) return <></>
+        switch(schoolData.id){
             case 'Abjuration':
                 return <Abjuration/>
             case 'Conjuration':
@@ -48,7 +56,13 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
             default:
                 return <></>
         }
-    }, [spell?.school?.id]);
+    }, [schools, spell]);
+    const bookIcon = useMemo(() => {
+        if(!spell || !spell.fromBook) return <></>
+        const bookInfo = books[spell.fromBook];
+        if (!bookInfo) return <div>{spell.fromBook}</div>
+        return <div>{bookInfo.source}({bookInfo.name})</div>
+    }, [books, spell]);
 
     return (
         <div className={'spell-card'} ref={ref}>
@@ -164,6 +178,9 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
             </div>
             <div style={{position:'absolute', top: 150, right: 150}}>
                 {(spell?.level||0)<1?'戏法':(spell?.level+"环")}
+            </div>
+            <div style={{position:'absolute', bottom: 150, right: 150}}>
+                {bookIcon}
             </div>
         </div>
     )

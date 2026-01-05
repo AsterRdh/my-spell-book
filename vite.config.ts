@@ -5,5 +5,7 @@ import svgr from "vite-plugin-svgr";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(),svgr(),],
+//根网页路径是SpellBook
+  base: '/SpellBook/',
   assetsInclude: ['**/*.ttf', '**/*.woff', '**/*.woff2', '**/*.eot','**/*.svg'],
 })
