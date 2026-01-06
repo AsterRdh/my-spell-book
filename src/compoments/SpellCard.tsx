@@ -27,7 +27,7 @@ type SpellCardProps = {
 const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
     const {spell,dataSet:{schools,books}} = props;
     const spellCardTitle = useMemo(() => {
-        if (!spell) return ['', ''];
+        if (!spell || !spell.name) return ['', ''];
         return [
             spell.name.at(0),
             spell.name.slice(1)
@@ -35,8 +35,8 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
     }, [spell]);
 
     const schoolIcon = useMemo(() => {
-        if(!spell || !spell.school) return <></>
-        const schoolData = schools[spell.school]
+        if(!spell || !spell.schoolID) return <></>
+        const schoolData = schools[spell.schoolID]
         if (!schoolData) return <></>
         switch(schoolData.id){
             case 'Abjuration':
@@ -58,9 +58,9 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
         }
     }, [schools, spell]);
     const bookIcon = useMemo(() => {
-        if(!spell || !spell.fromBook) return <></>
-        const bookInfo = books[spell.fromBook];
-        if (!bookInfo) return <div>{spell.fromBook}</div>
+        if(!spell || !spell.fromBookID) return <></>
+        const bookInfo = books[spell.fromBookID];
+        if (!bookInfo) return <div>{spell.fromBookID}</div>
         return <div>{bookInfo.source}({bookInfo.name})</div>
     }, [books, spell]);
 

@@ -4,7 +4,7 @@ export type SpellType={
     name:string,
     cnName:string,
     level:number,
-    school:string,
+    schoolID:string,
     needVerbal:boolean,
     needSomatic:boolean,
     needMaterial:boolean,
@@ -19,7 +19,7 @@ export type SpellType={
     baseDescription:string,
     upgradeDescription:string,
     img?:string,
-    fromBook?:string
+    fromBookID?:string
 }
 
 export type SpellSchoolType={
@@ -38,4 +38,11 @@ export type BookType={
     published:string,
     author:string,
     cover:string,
+}
+
+export type AjaxResultType<E>={
+    code:number,
+    success:boolean,
+    message?:string,
+    data:E
 }

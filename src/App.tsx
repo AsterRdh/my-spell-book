@@ -1,17 +1,34 @@
 import './App.css'
-import {Button, Col, Form, Input, Modal, Row, Slider, Space, Spin} from "antd";
+import {Button, Col, ConfigProvider, Form, Input, Modal, Row, Select, Slider, Space, Spin, theme} from "antd";
 import {useForm} from "antd/es/form/Form";
-import type {SpellType} from "./types/DataType.ts";
-import {bookOptions, books, defaultBook, schoolOptions, schools, TestData} from "./data/TestData.ts";
+import type {AjaxResultType, BookType, SpellSchoolType, SpellType} from "./types/DataType.ts";
+import {defaultBook, type SelectOptionType, TestData} from "./data/TestData.ts";
 import SpellCard from "./compoments/SpellCard.tsx";
 import html2canvas from 'html2canvas';
-import {useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import useNotification from "antd/es/notification/useNotification";
 import SpellForm from "./compoments/SpellForm.tsx";
+import useTheme from "./hooks/useTheme.ts";
+
+let timeout: ReturnType<typeof setTimeout> | null;
+let currentValue: string;
+
+const toURLSearchParams = <T extends Record<string, any>>(record: T) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(record)) {
+        params.append(key, value);
+    }
+    return params;
+};
+
 function App() {
 
     const [form] = useForm<SpellType>();
     const spellValues = Form.useWatch([], form);
+    const okSave = useMemo(() => {
+        return  !spellValues || spellValues.name !== 'Spell'
+     }, [spellValues]);
+
     const [notification, message] = useNotification();
     const [loading, setLoading] = useState(false)
 
@@ -156,7 +173,7 @@ function App() {
                 name: name,
                 cnName: cnName,
                 level: level,
-                school: school.id,
+                schoolID: school.id,
                 castingTime: castingTime,
                 range: rangeStr,
                 duration: durationStr,
@@ -166,7 +183,7 @@ function App() {
                 material: materialStr,
                 baseDescription: description.join('\n\n'),
                 upgradeDescription: upgradeStr,
-                fromBook:defaultBook.id
+                fromBookID:defaultBook.id
             }
             form.setFieldsValue(spell)
             setOpenImportModal(false)
@@ -181,72 +198,226 @@ function App() {
 
     const [scale, setScale] = useState(100)
 
+
+    const [books, setBooks] = useState<{[key:string]:BookType}>({})
+    const [bookOptions, setBookOptions] = useState<SelectOptionType<BookType>[]>([])
+    const loadBook = () => {
+        return fetch('/SpellBook/dnd/getBooks')
+            .then(res=>res.json())
+            .then( (data:AjaxResultType<{[key:string]:BookType}>)=>{
+                if (data.success){
+                    const schoolData = data.data
+                    setBooks(schoolData)
+                    const options:SelectOptionType<BookType>[]=Object.values(schoolData).map(book=>{
+                        const option:SelectOptionType<BookType> = {
+                            label:book.id+" "+book.name,
+                            value:book.id,
+                            data:book
+                        }
+                        return option
+                    });
+                    setBookOptions(options)
+                }
+            })
+
+    };
+
+    const [schools, setSchools] = useState<{[key:string]:SpellSchoolType}>({})
+    const [schoolOptions, setSchoolOptions] = useState<SelectOptionType<SpellSchoolType>[]>([])
+    const loadSchool = () => {
+        return fetch('/SpellBook/dnd/getSpellSchool')
+            .then(res=>res.json())
+            .then( (data:AjaxResultType<{[key:string]:SpellSchoolType}>)=>{
+                if (data.success){
+                    const schoolData = data.data
+                    setSchools(schoolData)
+                    const options:SelectOptionType<SpellSchoolType>[]=Object.values(schoolData).map(school=>{
+                        const option:SelectOptionType<SpellSchoolType> = {
+                            label:school.name,
+                            value:school.id,
+                            data:school
+                        }
+                        return option
+                    });
+                    setSchoolOptions(options)
+                }
+            })
+
+    };
+
+    const {isDarkMode} = useTheme()
+
+    useEffect(()=>{
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLoading(true)
+        Promise.all([
+            loadBook(),
+            loadSchool(),
+        ]).finally(()=>{
+            setLoading(false)
+        })
+    },[])
+
+
+    const [searchData, setSearchData] = useState<SelectOptionType<SpellType>[]>([]);
+    const [searchValue, setSearchValue] = useState<string>();
+
+    const handleSearch = (newValue: string) => {
+        fetchSearchData(newValue, setSearchData);
+    };
+
+    const fetchSearchData = (value: string, callback: (data: SelectOptionType<SpellType>[]) => void) => {
+        if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
+        currentValue = value;
+
+        const params = toURLSearchParams({ name: value });
+
+        const fake = () => {
+            fetch(`/SpellBook/dnd/getSpells?${params.toString()}`)
+                .then((response) => response.json())
+                .then((res: AjaxResultType<SpellType[]>) => {
+                    if (currentValue === value) {
+                        const data = (res.data||[]).map(spell=> {
+                            return {
+                                label: spell.name + " " + spell.cnName,
+                                value: spell.id,
+                                data: spell
+                            } as SelectOptionType<SpellType>
+                        })
+                        console.log("/dnd/getSpells", data)
+                        callback(data);
+                    }
+                });
+        };
+        if (value) {
+            timeout = setTimeout(fake, 300);
+        } else {
+            callback([]);
+        }
+    };
+
+    const handleChange = (newValue: string,option?: SelectOptionType<SpellType> | SelectOptionType<SpellType> []) => {
+        setSearchValue(newValue);
+        if(option){
+            let spell:SpellType
+            if (Array.isArray(option)){
+                 spell = option[0].data
+            }else {
+                spell = option.data
+            }
+            if ( spell){
+                form.resetFields()
+                form.setFieldsValue(spell)
+            }
+
+        }
+    };
+
     return (
-      <div className={'app'}>
-        <div className={'app-left'}>
-            <div className={'view'}>
-                <div className={'pre-view'} style={{transform:"scale("+(scale/100)+")"}}>
-                  <SpellCard spell={spellValues} ref={canvasRef}
-                             dataSet={{
-                                 schools:schools,
-                                 books:books
-                             }}
-                  />
+        <ConfigProvider
+            theme={{
+                algorithm: isDarkMode? theme.darkAlgorithm : theme.defaultAlgorithm,
+            }}
+        >
+            <div className={'app'}>
+            <div className={'app-left'}>
+                <div className={'view'}>
+                    <div className={'pre-view'} style={{transform:"scale("+(scale/100)+")"}}>
+                      <SpellCard spell={spellValues} ref={canvasRef}
+                                 dataSet={{
+                                     schools:schools,
+                                     books:books
+                                 }}
+                      />
+                    </div>
+                </div>
+                <div>
+                    <Row>
+                        <Col flex={"auto"}/>
+                        <Col>
+                           <Space>
+                               缩放
+                               <Slider style={{width:200}} value={scale} onChange={(value)=>setScale(value)} max={100} min={25}/>
+                               <div style={{width:'3rem',textAlign:"right"}}>
+                                   {scale}%
+                               </div>
+                           </Space>
+                        </Col>
+
+                    </Row>
                 </div>
             </div>
-            <div>
-                <Row>
-                    <Col flex={"auto"}/>
-                    <Col>
-                       <Space>
-                           缩放
-                           <Slider style={{width:200}} value={scale} onChange={(value)=>setScale(value)} max={100} min={25}/>
-                           <div style={{width:'3rem',textAlign:"right"}}>
-                               {scale}%
-                           </div>
-                       </Space>
-                    </Col>
+            <div className={'app-right'}>
+                <div style={{textAlign: 'right',padding:'24px'}}>
+                    <Row gutter={[8,0]}>
+                        <Col>
+                            <Button onClick={()=>{form.submit()}} disabled={!okSave}>
+                                上传
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={()=>{form.resetFields();setSearchValue(undefined)}}>
+                                重置
+                            </Button>
+                        </Col>
+                        <Col flex={"auto"}>
+                            <Select
+                                showSearch={{ filterOption: false, onSearch: handleSearch }}
+                                value={searchValue}
+                                placeholder={"搜索法术"}
+                                style={{width:'100%',minWidth:'200px'}}
+                                defaultActiveFirstOption={false}
+                                suffixIcon={null}
+                                onChange={handleChange}
+                                notFoundContent={null}
+                                options={searchData}
+                                variant={"underlined"}
+                                allowClear={ true}
+                            />
 
-                </Row>
-            </div>
-        </div>
-        <div className={'app-right'}>
-            <div style={{textAlign: 'right',padding:'24px'}}>
-                <Space>
-                    <Button onClick={()=>{setOpenImportModal(true)}}>
-                        快速导入
-                    </Button>
-                    <Button onClick={handleConvert}>
-                        导出为图片
-                    </Button>
-                </Space>
-            </div>
-            <div style={{flex: 1, overflowY: 'scroll',overflowX: 'hidden',padding:'0 24px'}}>
-                <SpellForm
-                    form={form}
-                    schoolOptions={schoolOptions}
-                    bookOptions={bookOptions}
-                    initialValues={TestData}
-                />
+                        </Col>
+                        <Col>
+                            <Button onClick={()=>{setOpenImportModal(true)}}>
+                                快速导入
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={handleConvert}>
+                                导出为图片
+                            </Button>
+                        </Col>
+                    </Row>
+                </div>
+                <div style={{flex: 1, overflowY: 'scroll',overflowX: 'hidden',padding:'0 24px'}}>
+                    <SpellForm
+                        form={form}
+                        schoolOptions={schoolOptions}
+                        bookOptions={bookOptions}
+                        initialValues={TestData}
+                    />
 
+                </div>
             </div>
-        </div>
-          <Modal title="快速导入"
-                 open={openImportModal}
-                 onCancel={()=>{setOpenImportModal(false)}}
-                 onOk={handleImport}
-                 afterClose={()=>{setImportData(undefined)}}
-                 okText={'导入'}
-          >
-              <div>
-                  <Input.TextArea value={importData} onChange={(e)=>{setImportData(e.target.value)}}
-                                  rows={15}
-                  />
-              </div>
-          </Modal>
-          {message}
-          <Spin fullscreen={true} spinning={loading}/>
-      </div>
+              <Modal title="快速导入"
+                     open={openImportModal}
+                     onCancel={()=>{setOpenImportModal(false)}}
+                     onOk={handleImport}
+                     afterClose={()=>{setImportData(undefined)}}
+                     okText={'导入'}
+              >
+                  <div>
+                      <Input.TextArea value={importData} onChange={(e)=>{setImportData(e.target.value)}}
+                                      rows={15}
+                      />
+                  </div>
+              </Modal>
+              {message}
+              <Spin fullscreen={true} spinning={loading}/>
+          </div>
+        </ConfigProvider>
     )
 }
 

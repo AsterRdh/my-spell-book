@@ -8,4 +8,13 @@ export default defineConfig({
 //根网页路径是SpellBook
   base: '/SpellBook/',
   assetsInclude: ['**/*.ttf', '**/*.woff', '**/*.woff2', '**/*.eot','**/*.svg'],
+  server: {
+    proxy: {
+      '/dnd': {
+        target: 'http://localhost:8080/dnd/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/dnd/, ''),
+      },
+    },
+  },
 })
