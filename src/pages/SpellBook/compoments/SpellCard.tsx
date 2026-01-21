@@ -1,4 +1,4 @@
-import type {BookType, SpellSchoolType, SpellType} from "../types/DataType.ts";
+import type {BookType, SpellSchoolType, SpellType} from "../../../types/DataType.ts";
 import {GiArcheryTarget, GiChest, GiClockwork, GiLips, GiSandsOfTime, GiSensuousness} from "react-icons/gi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -13,7 +13,7 @@ import {
     Evocation,
     Necromancy,
     Transmutation
-} from "../icons/SchoolIcons.tsx";
+} from "../../../icons/SchoolIcons.tsx";
 
 type SpellCardProps = {
     spell?:SpellType

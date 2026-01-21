@@ -1,4 +1,8 @@
+import type {BaseOptionType} from "@rc-component/select/lib/Select";
 
+export type SelectOptionType<DataType>=BaseOptionType&{
+    data:DataType
+}
 export type SpellType={
     id:number,
     name:string,

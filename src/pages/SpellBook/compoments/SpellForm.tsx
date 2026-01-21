@@ -1,8 +1,7 @@
 import {useForm} from "antd/es/form/Form";
-import type {BookType, SpellSchoolType, SpellType} from "../types/DataType.ts";
+import type {BookType, SpellSchoolType, SpellType,SelectOptionType} from "../../../types/DataType.ts";
 import type {FormInstance} from "antd/lib";
 import {Checkbox, Col, Form, Input, InputNumber, Row, Select, Space, Spin} from "antd";
-import {type SelectOptionType} from "../data/TestData.ts";
 import {useState} from "react";
 
 type SpellFormProps={
