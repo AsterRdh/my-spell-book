@@ -21,11 +21,12 @@ type SpellCardProps = {
         schools:{[key:string]:SpellSchoolType}
         books:{[key:string]:BookType};
     }
+    size:[number, number]
  
 }
 
 const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
-    const {spell,dataSet:{schools,books}} = props;
+    const {spell,dataSet:{schools,books},size} = props;
     const spellCardTitle = useMemo(() => {
         if (!spell || !spell.name) return ['', ''];
         return [
@@ -65,7 +66,7 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
     }, [books, spell]);
 
     return (
-        <div className={'spell-card'} ref={ref}>
+        <div className={'spell-card'} ref={ref} style={{width: size[0], height: size[1],maxWidth:size[0], maxHeight:size[1]}}>
             <div className={'spell-card-title-box'}>
                 <div className={'first-litter'}>
                     {spellCardTitle[0]}

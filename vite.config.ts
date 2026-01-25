@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/dnd': {
-        target: 'http://localhost:8080/dnd/',
+        target: 'https://cyberaster.space/SpellBook/dnd/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/dnd/, ''),
       },

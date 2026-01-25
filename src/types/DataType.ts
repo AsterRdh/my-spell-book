@@ -50,3 +50,12 @@ export type AjaxResultType<E>={
     message?:string,
     data:E
 }
+
+
+export type PageSetting = {
+    pageSize: {
+        width: number,
+        height: number
+    }
+}
+export const SizeScaling=[120,125]

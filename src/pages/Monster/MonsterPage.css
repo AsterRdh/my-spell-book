@@ -1,0 +1,41 @@
+.bestiary-card{
+    width:1170px;
+    max-width: 1170px;
+    height:1600px;
+    max-height: 1600px;
+    position:relative;
+    background-color:#ffffff;
+    color:#000000;
+    padding: 210px 118px 210px 260px;
+    overflow: hidden;
+    font-size:  42px;
+    display: flex;
+    flex-direction: column;
+    font-family: '霞鹜文楷', sans-serif;
+    border: black  1px solid;
+    .bestiary-card-title-box {
+        display: flex;
+        align-items: anchor-center;
+        line-height: 1;
+        .bestiary-card-title{
+            font-family: "Nodesto Caps Condensed", serif;
+            font-size: 180px;
+            margin-right: 20px;
+        }
+        .bestiary-card-title-sub{
+            font-size: 80px;
+            flex: 1;
+        }
+    }
+}
+.bestiary-card-action{
+    font-size: 60px;
+    font-weight: 1200;
+}
+.bestiary-tag{
+    border: #2c2c2c 1px solid;
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.4rem;
+    font-size: 32px;
+    height: 32px;
+}

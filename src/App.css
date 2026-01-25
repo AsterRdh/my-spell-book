@@ -34,7 +34,6 @@
 }
 
 .app{
-
   display: flex;
   width: 100vw;
   height: 100vh;
@@ -42,8 +41,37 @@
   max-height: 100vh;
 }
 
-
-
 .read-the-docs {
   color: #888;
+}
+.app-left{
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  .view-box{
+    display: flex;
+    flex: 1;
+    height: 0;
+    .view{
+      overflow: scroll;
+      padding: 2rem;
+      flex: 1;
+    }
+    .view-tool{
+      padding: 0.5rem;
+      width: 32px;
+    }
+  }
+}
+
+.app-right{
+  width: 35vw;
+  min-width: 400px;
+
+  border-left: #2c2c2c 2px solid;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }

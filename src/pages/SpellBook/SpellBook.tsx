@@ -1,6 +1,13 @@
 import {useForm} from "antd/es/form/Form";
-import type {AjaxResultType, BookType, SpellSchoolType, SpellType,SelectOptionType} from "../../types/DataType.ts";
-import {Button, Col, Form, Input, Modal, Row, Select, Slider, Space, Spin} from "antd";
+import {
+    type AjaxResultType,
+    type BookType,
+    type SpellSchoolType,
+    type SpellType,
+    type SelectOptionType,
+    type PageSetting, SizeScaling
+} from "../../types/DataType.ts";
+import {Button, Col, Form, Input, InputNumber, Modal, Row, Select, Slider, Space, Spin} from "antd";
 import {useEffect, useMemo, useRef, useState} from "react";
 import useNotification from "antd/es/notification/useNotification";
 import html2canvas from "html2canvas";
@@ -9,6 +16,7 @@ import {defaultBook, defaultData} from "./DefaultData.ts";
 import SpellCard from "./compoments/SpellCard.tsx";
 import SpellForm from "./compoments/SpellForm.tsx";
 import './SpellBook.css'
+import {IoMdSettings} from "react-icons/io";
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
 type mapType= Record<string, string>;
@@ -19,6 +27,8 @@ const toURLSearchParams = <T extends mapType>(record: T) => {
     }
     return params;
 };
+type SpellBookSetting = PageSetting
+
 
 export default function SpellBook() {
     const [form] = useForm<SpellType>();
@@ -109,7 +119,6 @@ export default function SpellBook() {
             }
             schoolStr = schoolStr.substring(0,2);
             const school = schools[schoolStr]||schoolOptions[0].data;
-
             const time=lines.find((line,index)=>{
                 if (line.startsWith('施法时间：')){
                     lineIndexies.push(index)
@@ -312,35 +321,50 @@ export default function SpellBook() {
 
         }
     };
-
+    const [showSettingModal, setShowSettingModal] = useState(false)
+    const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
+    const [settingForm] = useForm<SpellBookSetting>()
 
     return (
         <>
             <div className={'app-left'}>
-                <div className={'view'}>
-                    <div className={'pre-view'} style={{transform: "scale(" + (scale / 100) + ")"}}>
-                        <SpellCard spell={spellValues} ref={canvasRef}
-                                   dataSet={{
-                                       schools: schools,
-                                       books: books
-                                   }}
-                        />
+                <div className={'view-box'} >
+                    <div className={'view'}>
+                        <div className={'pre-view'} style={{transform: "scale(" + (scale / 100) + ")"}}>
+                            <SpellCard spell={spellValues}
+                                       ref={canvasRef}
+                                       dataSet={{
+                                           schools: schools,
+                                           books: books
+                                       }}
+                                       size={[SizeScaling[0]*pageSize[0], SizeScaling[1]*pageSize[1]]}
+                            />
+                        </div>
+                    </div>
+                    <div className={'view-tool'}>
+                        <Space vertical={true} >
+                            <Button variant="filled" icon={<IoMdSettings />} onClick={()=>setShowSettingModal(true)} />
+                        </Space>
                     </div>
                 </div>
                 <div>
-                    <Row>
+                    <Row align={"middle"} >
+                        <Col >
+                            <div style={{marginLeft: '1rem'}}>
+                                {pageSize[0]}×{pageSize[1]}(cm)
+                            </div>
+                        </Col>
                         <Col flex={"auto"}/>
                         <Col>
                             <Space>
                                 缩放
                                 <Slider style={{width: 200}} value={scale} onChange={(value) => setScale(value)}
                                         max={100} min={25}/>
-                                <div style={{width: '3rem', textAlign: "right"}}>
+                                <div style={{width: '3rem', textAlign: "right", paddingRight: '1rem'}}>
                                     {scale}%
                                 </div>
                             </Space>
                         </Col>
-
                     </Row>
                 </div>
             </div>
@@ -420,6 +444,41 @@ export default function SpellBook() {
                                     rows={15}
                     />
                 </div>
+            </Modal>
+            <Modal title="设置"
+                   open={showSettingModal}
+                   onCancel={() => {
+                       setShowSettingModal(false)
+                   }}
+                   onOk={() => {
+                       settingForm.submit()
+                   }}
+                   afterOpenChange={() => {
+                       settingForm.setFieldsValue({
+                           pageSize: {width: pageSize[0], height: pageSize[1]}
+                       })
+                   }}
+            >
+                <Form<SpellBookSetting>
+                    form={settingForm}
+                    initialValues={{pageSize: {width: 10, height: 12.8}}}
+                    onFinish={setting=>{
+                        const {width, height} = setting.pageSize;
+                        setPageSize([width, height])
+                        setShowSettingModal(false)
+                    }}
+                >
+                    <Form.Item label="页面大小" >
+                        <Space>
+                            <Form.Item label={'宽'} name={['pageSize','width']} noStyle>
+                                <InputNumber prefix="宽：" suffix="CM" style={{width: '8rem'}} />
+                            </Form.Item>
+                            <Form.Item label={'高'} name={['pageSize','height']} noStyle>
+                                <InputNumber prefix="高：" suffix="CM"  style={{width: '8rem'}} />
+                            </Form.Item>
+                        </Space>
+                    </Form.Item>
+                </Form>
             </Modal>
             {message}
             <Spin fullscreen={true} spinning={loading}/>
