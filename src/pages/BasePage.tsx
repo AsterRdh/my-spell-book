@@ -1,27 +1,32 @@
 import React, {useRef, useState} from "react";
 import html2canvas from "html2canvas";
-import useNotification from "antd/es/notification/useNotification";
-import {Button, Col,  Input,  Modal, Row,  Slider, Space, Spin} from "antd";
+import {Button, Col,  Input,  Modal, Row,  Slider, Space} from "antd";
+import type {NotificationInstance} from "antd/es/notification/interface";
+import { IoMdSettings } from "react-icons/io";
 
 type MonsterPageProps = {
     preViewRender:(ref:React.RefObject<HTMLDivElement|null>)=>React.ReactNode
     exportNameGetter:()=>string
     preViewButtonRender:()=>React.ReactNode|React.ReactNode[]
+    preViewBottomRender:()=>React.ReactNode|React.ReactNode[]
     buttonRender:()=>React.ReactNode|React.ReactNode[]
-    handleImport:(inputData?:string)=>Promise<void>
+    handleImport:(inputData?:string)=>Promise<unknown>
     settingRender:()=>React.ReactNode|React.ReactNode[],
     afterSettingModalOpenChange:(open:boolean)=>void
     onSettingSave:()=>Promise<void>
     children:React.ReactNode
+    notification:NotificationInstance
+    setLoading:(loading:boolean)=>void
 };
 
 const BasePage=(props:MonsterPageProps)=>{
-    const {preViewRender,exportNameGetter,preViewButtonRender,buttonRender,children} = props
+    const {preViewRender,exportNameGetter,preViewButtonRender,preViewBottomRender,buttonRender,children} = props
     const {handleImport} = props
-    const {afterSettingModalOpenChange,settingRender,onSettingSave} = props
+    const {notification,setLoading} = props
+    const {afterSettingModalOpenChange,onSettingSave} = props
+    const {settingRender} = props
 
-    const [notification, message] = useNotification();
-    const [loading, setLoading] = useState(false)
+
 
     const [scale, setScale] = useState(100)
     const canvasRef = useRef<HTMLDivElement>(null);
@@ -64,11 +69,17 @@ const BasePage=(props:MonsterPageProps)=>{
                         </div>
                     </div>
                     <div className={'view-tool'}>
+                        <Space vertical>
+                            {preViewButtonRender()}
+                            <Button variant="filled" icon={<IoMdSettings />} onClick={()=>setShowSettingModal(true)} />
+                        </Space>
                     </div>
                 </div>
                 <div className={'view-bottom'}>
                     <Row align={"middle"} >
-                        {preViewButtonRender()}
+                        <Col>
+                            {preViewBottomRender()}
+                        </Col>
                         <Col flex={"auto"}/>
                         <Col>
                             <Space>
@@ -86,7 +97,13 @@ const BasePage=(props:MonsterPageProps)=>{
             <div className={'app-right'}>
                 <div style={{textAlign: 'right', padding: '24px'}}>
                     <Row gutter={[8, 0]} wrap={false}>
-                        {buttonRender()}
+                        <Col>
+                            <Button key={'import'} onClick={() => {
+                                setOpenImportModal(true)
+                            }}>从不全书导入</Button>
+                            {buttonRender()}
+                        </Col>
+
                         <Col flex={"auto"}/>
                         <Col>
                             <Button onClick={handleConvert}>
@@ -139,8 +156,7 @@ const BasePage=(props:MonsterPageProps)=>{
             >
                 {settingRender()}
             </Modal>
-            {message}
-            <Spin fullscreen={true} spinning={loading}/>
+
         </>
     )
 }

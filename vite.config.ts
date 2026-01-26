@@ -10,10 +10,10 @@ export default defineConfig({
   assetsInclude: ['**/*.ttf', '**/*.woff', '**/*.woff2', '**/*.eot','**/*.svg'],
   server: {
     proxy: {
-      '/dnd': {
+      '/SpellBook/dnd': {
         target: 'https://cyberaster.space/SpellBook/dnd/',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/dnd/, ''),
+        rewrite: (path) => path.replace(/^\/SpellBook\/dnd/, ''),
       },
     },
   },

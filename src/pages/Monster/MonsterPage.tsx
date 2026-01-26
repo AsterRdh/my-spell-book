@@ -1,40 +1,303 @@
-import React, { useState} from "react";
-import {Button, Col, Divider, Form, Input, InputNumber, Row, Select, Space,} from "antd";
+import React, {useState} from "react";
+import {Button, Col, Divider, Form, Input, InputNumber, Row, Select, Space, Spin,} from "antd";
 import BasePage from "../BasePage.tsx";
 import MonsterCard from "./MonsterCard.tsx";
 import {useForm} from "antd/es/form/Form";
-import {type BookType, type PageSetting, type SelectOptionType, SizeScaling} from "../../types/DataType.ts";
-import { MinusCircleOutlined1} from '@ant-design/icons';
+import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
+import {MinusCircleOutlined} from '@ant-design/icons';
 import {
-    type Monster,
+    type AbilityType,
+    AttributeLang,
+    type Monster, type MonsterSavingThrow,
     type MonsterSize,
     MonsterSizeLang,
     type MonsterType,
-    MonsterTypeLang,
-
+    MonsterTypeLang, type SensesValue, SkillLang, type SkillType, type SkillValue,
+    type SpeedType,
+    SpeedTypeLang,
+    type SpeedValue,
 } from "./Types.ts";
 import {DefaultData} from "./DefaultData.ts";
 import './MonsterPage.css'
-import AlignmentSelector from "../../compoment/AlignmentSelector/AlignmentSelector.tsx";
+import AlignmentSelector, {
+    type Alignment1,
+    type Alignment2
+} from "../../compoment/AlignmentSelector/AlignmentSelector.tsx";
 import SkillSelector from "../../compoment/SkillSelector/SkillSelector.tsx";
 import SpeedSelector from "../../compoment/SpeedSelector/SpeedSelector.tsx";
 import SavingThrowSelector from "../../compoment/SavingThrowSelector/SavingThrowSelector.tsx";
+import {useDNDBook} from "../../hooks/useDNDBook.tsx";
+import useNotification from "antd/es/notification/useNotification";
+import {AlignmentLang} from "../../utils/AlignmentUtils.ts";
 
 type MonsterPageSetting=PageSetting
 
-export const MonsterPage=()=>{
+const getDataNoPS=(splitters:string[],data?:string)=>{
+    if (! data) return undefined
+    let number=-1
+    splitters.find(splitter=>{
+        number = data.indexOf(splitter);
+        if (number>=0) return number
+    })
+    return data.substring(number + 1)
+}
 
+const getDataWithPS=(data?:string)=>{
+    if (! data) return [undefined,undefined]
+    const acRow = getDataNoPS(['：',':'],data);
+    if (!acRow) return [undefined,undefined]
+    let number = acRow.indexOf("（");
+    if (number<0) number = acRow.indexOf("(");
+    if (number<0) number = acRow.length;
+    const ac = acRow.substring(0, number);
+    const acPS = number<acRow.length && acRow.substring(number+1,acRow.length-1) || '';
+    return [ac,acPS]
+}
+
+export const MonsterPage=()=>{
+    const [notification, message] = useNotification();
     const [form] = useForm<Monster>()
     const monsterValues = Form.useWatch([], form);
-    const [books, 1etBooks] = useState<{[key:string]:BookType}>({})
-    const [bookOptions, setBookOptions] = useState<SelectOptionType<BookType>[]>([])
+    const [loading, setLoading] = useState(false)
+
+    const {books,bookOptions} = useDNDBook(notification);
+
     const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
     const [settingForm] = useForm<MonsterPageSetting>()
 
+    const handleImport = (imputData?: string) => {
+        setLoading( true)
+        return new Promise((resolve,reject) => {
+            if(!imputData) return resolve(true)
+            try{
+                //清除空行
+                let rows = imputData.split('\n');
+                rows = rows.filter(row => row && row.trim()).map(row => row.trim());
+                if (rows.length == 0) return resolve(true);
+                const data: Monster = {}
+                const nameRow = rows[0];
+                //分割名称，寻找第一个英文字母位置，切割未两个部分
+                const nameParts = nameRow.split(/[a-zA-Z]/);
+                const cnName = nameParts[0];
+                const name = nameRow.substring(cnName.length)
+                data.name = name
+                data.cnName = cnName
+                //微型野兽，无阵营
+                const typeRow = rows[1];
+                const sizeIndex = typeRow.indexOf("型")+1;
+                //获取大小
+                const sizeStr = typeRow.substring(0, sizeIndex);
+                const size = Object.keys(MonsterSizeLang).find(key => MonsterSizeLang[key as MonsterSize] == sizeStr);
+                if (size){data.size = size as MonsterSize;}
 
+                // 类型
+                const typeStr = typeRow.substring(sizeIndex, sizeIndex+2);
+                const type = Object.keys(MonsterTypeLang).find(key => MonsterTypeLang[key as MonsterType] == typeStr);
+                if (type){data.type = type as MonsterType;}
+
+                //阵营
+                const alignmentStr = typeRow.substring(sizeIndex+3);
+                if (!alignmentStr || alignmentStr=='无阵营'){
+                    data.alignment = undefined
+                }else {
+                    const alignmentStr1 = alignmentStr.substring(0,2);
+                    const alignment1 = Object.keys(AlignmentLang).find(key => AlignmentLang[key as (Alignment2 | Alignment1)] == alignmentStr1);
+                    const alignmentStr2 = alignmentStr.substring(2);
+                    const alignment2 = Object.keys(AlignmentLang).find(key => AlignmentLang[key as (Alignment2 | Alignment1)] == alignmentStr2);
+                    data.alignment=[alignment1 as Alignment1,alignment2 as Alignment2]
+                }
+                //护甲等级：16（天生护甲）
+                const acRow = rows[2]
+                const [ac] = getDataWithPS(acRow)
+                if (ac) data.ac = parseInt(ac)
+
+                //生命值：32（5d8+10）
+                const hpRow = rows[3]
+                const [hp,hpPS] = getDataWithPS(hpRow)
+                if (hp) data.hp = parseInt(hp)
+                if (hpPS) data.hpRoll = hpPS
+
+                const speedRow = rows[4]
+                const speedRow1 = getDataNoPS(['：',':'],speedRow);
+                if (speedRow1){//在中文或英文逗号处切割
+                    const speeds = speedRow1.split(/[,，]/).map((speed, index)=>{
+                        if (index==0){
+                            return {
+                                type: 'Default',
+                                value: speed
+                            } as SpeedValue
+                        }else {
+                            //"攀爬30尺" 分割为[攀爬,30尺]
+                            //寻找第一个数字
+                            const number = speed.match(/[\d.]+/);
+                            if ( number && number.index!=undefined){
+                                const numberIndex = number.index;
+                                const speedTypeStr = speed.substring(0, numberIndex);
+                                const speedType = Object.keys(SpeedTypeLang).find(key => SpeedTypeLang[key as SpeedType] == speedTypeStr);
+                                if (speedType){
+                                    const speedValue = speed.substring(numberIndex);
+                                    return {
+                                        type: speedType as SpeedType,
+                                        value: speedValue
+                                    } as SpeedValue
+                                }
+                            }
+                        }
+                    }).filter(speed=>!!speed);
+                    data.speed = speeds
+                }
+
+                //属性
+                const ability ={pow:0,dex:0,con:0,int:0,wis:0,cha:0}
+                data.ability=ability
+                const abilityRow = (rows[5]+rows[6]).replaceAll("（",'(').replaceAll("）",')')
+                const abilitiesStr = abilityRow.split(")");
+                abilitiesStr.forEach(abilityStr=>{
+                    let abilityStr1 = abilityStr.trim();
+                    const number1 = abilityStr1.indexOf("(");
+                    abilityStr1 = abilityStr1.substring(0,number1)
+                    const abilityName = abilityStr1.substring(0,2);
+                    const find = Object.keys(AttributeLang).find(key => AttributeLang[key as AbilityType] == abilityName);
+                    if (find){
+                        const abilityValue = parseInt(abilityStr1.substring(2));
+                        switch ( find){
+                            case 'pow':ability.pow = abilityValue;break;
+                            case 'dex':ability.dex = abilityValue;break;
+                            case 'con':ability.con = abilityValue;break;
+                            case 'int':ability.int = abilityValue;break;
+                            case 'wis':ability.wis = abilityValue;break;
+                            case 'cha':ability.cha = abilityValue;break;
+                        }
+                    }
+                })
+
+                //7
+                let otherIndex = rows.findIndex(row=>row.includes('。'));
+                if (otherIndex<0) otherIndex = rows.length;
+                for (let i = 7; i < otherIndex; i++) {
+                    const row = rows[i].replaceAll("：",':').replaceAll("，",',');
+                    const rowArray = row.split(':');
+                    const rowType  = rowArray[0];
+                    const rowInfo = rowArray[1].split(',');
+                    switch (rowType){
+                        case '豁免':{
+                            const savingThrow: MonsterSavingThrow[] = []
+                            rowInfo.map(savingThrowStr=>{
+                                const abilityName = savingThrowStr.substring(0,2);
+                                const value = parseInt(savingThrowStr.substring(2));
+                                const name = Object.keys(AttributeLang).find(key => AttributeLang[key as AbilityType] == abilityName);
+                                if ( name){
+                                    savingThrow.push( {
+                                        type: name as AbilityType,
+                                        value: value
+                                    })
+                                }
+                            })
+                            data.savingThrow = savingThrow
+                            break ;
+                        }
+                        case '技能':{
+                            const skillValues: SkillValue[] = []
+                            rowInfo.map(skillValueStr=>{
+                                const skillName = skillValueStr.substring(0,2);
+                                const value = parseInt(skillValueStr.substring(2));
+                                const name = Object.keys(SkillLang).find(key => SkillLang[key as SkillType] == skillName);
+                                if ( name){
+                                    skillValues.push( {
+                                        type: name as SkillType,
+                                        value: value
+                                    })
+                                }
+                            })
+                            data.skills = skillValues
+                            break ;
+                        }
+                        case '感官':{
+                            const ppStr = rowInfo.find(item=>item.startsWith("被动察觉"))
+                            if (ppStr){
+                                data.passivePerception = parseInt(ppStr.substring(4))
+                            }
+                            data.senses = rowInfo.filter(item=>!item.startsWith("被动察觉"))
+                                .map(item=>{
+                                    //找数字
+                                    const number = item.match(/[\d.]+/);
+                                    if ( number && number.index!=undefined){
+                                        const numberIndex = number.index;
+                                        return {
+                                            type: item.substring(0,numberIndex),
+                                            value: item.substring(numberIndex)
+                                        } as SensesValue
+                                    }else {
+                                        return {
+                                            type: item,
+                                            value:''
+                                        } as SensesValue
+                                    }
+                                })
+
+                            break;
+                        }
+                        case '语言':{
+                            data.languages = rowInfo[0].split(",")
+                                .filter(language => language &&  language!='——')
+                                .map(language => language.trim());
+                            break;
+                        }
+                        case '挑战等级':{
+                            const strings = rowInfo.join("").replaceAll("（",'(').split("(");
+                            data.level = parseInt(strings[0]);
+                            data.xp = parseInt(strings[1].substring(0,strings[1].length-3).replaceAll(",",''));
+                            break
+                        }
+                    }
+                }
+
+                let actionIndex = rows.findIndex(row=>row.trim()=='动作');
+                if (actionIndex<0) actionIndex = rows.length;
+                //特性
+                const feature:{name:string,description:string}[] = []
+                for (let i = otherIndex; i < actionIndex; i++) {
+                    const row = rows[i];
+                    const number2 = row.indexOf("。");
+                    const title = row.substring(0,number2);
+                    const dataValue = row.substring(number2+1);
+                    feature.push( {
+                        name: title,
+                        description: dataValue
+                    })
+                }
+                data.feature = feature
+
+                //动作
+                const action:{name:string,description:string}[] = []
+                for (let i = actionIndex+1; i < rows.length; i++) {
+                    const row = rows[i];
+                    const number2 = row.indexOf("。");
+                    const title = row.substring(0,number2);
+                    const dataValue = row.substring(number2+1);
+                    action.push( {
+                        name: title,
+                        description: dataValue
+                    })
+                }
+                data.action = action
+                data.fromBook ="PHB"
+                form.resetFields()
+                form.setFieldsValue(data)
+
+                return resolve(true)
+            }catch (e:unknown){
+                return reject(e)
+            }
+
+        }).finally(() => {
+            setLoading(false)
+        })
+    }
     return (
        <>
            <BasePage
+               notification={ notification} setLoading={setLoading}
                preViewRender={(ref) => {
                    return <MonsterCard ref={ref}
                                        dataSource={monsterValues}
@@ -61,29 +324,52 @@ export const MonsterPage=()=>{
 
                }}
                preViewButtonRender={() => {
-                   return [];
+                   return [
+                   ];
+               }}
+               preViewBottomRender={()=>{
+                   return <Space>
+                       <div style={{marginLeft: '1rem'}}>
+                           {pageSize[0]}×{pageSize[1]}(cm)
+                       </div>
+                   </Space>
                }}
                settingRender={() => {
-                   return <Form form={settingForm}>
-
-                   </Form>;
+                   return<Form<MonsterPageSetting>
+                           form={settingForm}
+                           initialValues={{pageSize: {width: 10, height: 12.8}}}
+                           onFinish={setting=>{
+                               const {width, height} = setting.pageSize;
+                               setPageSize([width, height])
+                           }}
+                       >
+                           <Form.Item label="页面大小" >
+                               <Space>
+                                   <Form.Item label={'宽'} name={['pageSize','width']} noStyle>
+                                       <InputNumber prefix="宽：" suffix="CM" style={{width: '8rem'}} />
+                                   </Form.Item>
+                                   <Form.Item label={'高'} name={['pageSize','height']} noStyle>
+                                       <InputNumber prefix="高：" suffix="CM"  style={{width: '8rem'}} />
+                                   </Form.Item>
+                               </Space>
+                           </Form.Item>
+                       </Form>;
                }}
-
+               onSettingSave={()=>{
+                   settingForm.submit();
+                   return Promise.resolve();
+               }}
                afterSettingModalOpenChange={(open) => {
                    if (!open) {
-                       settingForm.resetFields();
+                       settingForm.setFieldsValue({
+                           pageSize: {width: pageSize[0], height: pageSize[1]}
+                       })
                    }
                }}
-               buttonRender={function (): React.ReactNode | React.ReactNode[] {
-                  return []
-               }}
-               handleImport={function (inputData?: string): Promise<void> {
-                   if (!inputData) return Promise.resolve();
-                   return Promise.resolve();
-               }}
-               onSettingSave={function (): Promise<void> {
-                   return Promise.resolve();
-               }}
+
+               buttonRender={function (): React.ReactNode | React.ReactNode[] {return []}}
+               handleImport={handleImport}
+
            >
                <Form form={form} initialValues={DefaultData}>
                    <Form.Item name="id" label={"ID"} hidden={ true}>
@@ -368,6 +654,9 @@ export const MonsterPage=()=>{
                    </Form.Item>
                </Form>
            </BasePage>
+           {message}
+           <Spin fullscreen={true} spinning={loading}/>
        </>
+
     )
 }

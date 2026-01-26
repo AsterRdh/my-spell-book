@@ -1,7 +1,6 @@
 import {useForm} from "antd/es/form/Form";
 import {
     type AjaxResultType,
-    type BookType,
     type SpellSchoolType,
     type SpellType,
     type SelectOptionType,
@@ -17,6 +16,7 @@ import SpellCard from "./compoments/SpellCard.tsx";
 import SpellForm from "./compoments/SpellForm.tsx";
 import './SpellBook.css'
 import {IoMdSettings} from "react-icons/io";
+import {useDNDBook} from "../../hooks/useDNDBook.tsx";
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
 type mapType= Record<string, string>;
@@ -207,28 +207,7 @@ export default function SpellBook() {
     const [scale, setScale] = useState(100)
 
 
-    const [books, setBooks] = useState<{[key:string]:BookType}>({})
-    const [bookOptions, setBookOptions] = useState<SelectOptionType<BookType>[]>([])
-    const loadBook = () => {
-        return fetch('/SpellBook/dnd/getBooks')
-            .then(res=>res.json())
-            .then( (data:AjaxResultType<{[key:string]:BookType}>)=>{
-                if (data.success){
-                    const schoolData = data.data
-                    setBooks(schoolData)
-                    const options:SelectOptionType<BookType>[]=Object.values(schoolData).map(book=>{
-                        const option:SelectOptionType<BookType> = {
-                            label:book.id+" "+book.name,
-                            value:book.id,
-                            data:book
-                        }
-                        return option
-                    });
-                    setBookOptions(options)
-                }
-            })
-
-    };
+    const {books,bookOptions} = useDNDBook(notification);
 
     const [schools, setSchools] = useState<{[key:string]:SpellSchoolType}>({})
     const [schoolOptions, setSchoolOptions] = useState<SelectOptionType<SpellSchoolType>[]>([])
@@ -257,7 +236,6 @@ export default function SpellBook() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true)
         Promise.all([
-            loadBook(),
             loadSchool(),
         ]).finally(()=>{
             setLoading(false)

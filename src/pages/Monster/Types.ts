@@ -67,7 +67,7 @@ export const SkillLang:{[key in SkillType]:string} = {
     Athletics : '运动',
     Acrobatics : '特技',
     SleightOfHand : '巧手',
-    Stealth : '隐藏',
+    Stealth : '隐匿',
     Arcana : '奥秘',
     History : '历史',
     Investigation : '调查',
