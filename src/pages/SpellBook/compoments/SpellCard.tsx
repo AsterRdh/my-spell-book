@@ -10,7 +10,7 @@ import {
     Conjuration,
     Divination,
     Enchantment,
-    Evocation,
+    Evocation, Illusion,
     Necromancy,
     Transmutation
 } from "../../../icons/SchoolIcons.tsx";
@@ -54,6 +54,8 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
                 return <Transmutation/>
             case 'Necromancy':
                 return <Necromancy/>
+            case 'Illusion':
+                return <Illusion/>
             default:
                 return <></>
         }

@@ -39,3 +39,7 @@
     font-size: 32px;
     height: 32px;
 }
+p{
+    margin-block-start: 0.5rem;
+    margin-block-end: 0.5rem;
+}

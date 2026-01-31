@@ -42,7 +42,10 @@ const BasePage=(props:MonsterPageProps)=>{
             // 克隆 SpellCard 组件内容到临时容器
             const clonedComponent = canvasRef.current.cloneNode(true) as HTMLElement;
             tempContainer.appendChild(clonedComponent);
-            html2canvas(clonedComponent, {useCORS: true,}).then((canvas) => {
+            html2canvas(clonedComponent, {
+                useCORS: true,allowTaint: true,
+                scrollY:0,scrollX:0,x:0,y:0
+            }).then((canvas) => {
                 const link = document.createElement("a");
                 link.download = exportNameGetter()+ ".png";
                 link.href = canvas.toDataURL("image/png");

@@ -1,10 +1,10 @@
 import React, {useState} from "react";
-import {Button, Col, Divider, Form, Input, InputNumber, Row, Select, Space, Spin,} from "antd";
+import {Button, Col, Divider, Form, Input, InputNumber, Radio, Row, Select, Space, Spin, Upload,} from "antd";
 import BasePage from "../BasePage.tsx";
 import MonsterCard from "./MonsterCard.tsx";
 import {useForm} from "antd/es/form/Form";
 import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
-import {MinusCircleOutlined} from '@ant-design/icons';
+import {MinusCircleOutlined, UploadOutlined} from '@ant-design/icons';
 import {
     type AbilityType,
     AttributeLang,
@@ -173,6 +173,11 @@ export const MonsterPage=()=>{
 
                 //7
                 let otherIndex = rows.findIndex(row=>row.includes('。'));
+                let actionIndex = rows.findIndex(row=>row.trim()=='动作');
+                if (actionIndex>0){
+                    if (otherIndex > actionIndex) otherIndex = actionIndex;
+                }
+
                 if (otherIndex<0) otherIndex = rows.length;
                 for (let i = 7; i < otherIndex; i++) {
                     const row = rows[i].replaceAll("：",':').replaceAll("，",',');
@@ -251,32 +256,41 @@ export const MonsterPage=()=>{
                         }
                     }
                 }
-
-                let actionIndex = rows.findIndex(row=>row.trim()=='动作');
                 if (actionIndex<0) actionIndex = rows.length;
                 //特性
-                const feature:{name:string,description:string}[] = []
-                for (let i = otherIndex; i < actionIndex; i++) {
-                    const row = rows[i];
-                    const number2 = row.indexOf("。");
-                    const title = row.substring(0,number2);
-                    const dataValue = row.substring(number2+1);
-                    feature.push( {
-                        name: title,
-                        description: dataValue
-                    })
+                const feature:{name:string,nameSub?:string,description:string}[] = []
+                if (otherIndex<actionIndex){
+                    for (let i = otherIndex; i < actionIndex; i++) {
+                        const row = rows[i];
+                        const number2 = row.indexOf("。");
+                        const title = row.substring(0,number2);
+                        const nameParts = title.split(/[a-zA-Z]/);
+                        const cnName = nameParts[0];
+                        const enName = title.substring(cnName.length)
+                        const dataValue = row.substring(number2+1);
+                        feature.push( {
+                            name: cnName,
+                            nameSub: enName,
+                            description: dataValue
+                        })
+                    }
                 }
                 data.feature = feature
 
                 //动作
-                const action:{name:string,description:string}[] = []
+                const action:{name:string,nameSub?:string,description:string}[] = []
                 for (let i = actionIndex+1; i < rows.length; i++) {
                     const row = rows[i];
                     const number2 = row.indexOf("。");
                     const title = row.substring(0,number2);
+                    const nameParts = title.split(/[a-zA-Z]/);
+                    const cnName = nameParts[0];
+                    const enName = title.substring(cnName.length)
+
                     const dataValue = row.substring(number2+1);
                     action.push( {
-                        name: title,
+                        name: cnName,
+                        nameSub: enName,
                         description: dataValue
                     })
                 }
@@ -287,6 +301,7 @@ export const MonsterPage=()=>{
 
                 return resolve(true)
             }catch (e:unknown){
+                console.error(e)
                 return reject(e)
             }
 
@@ -294,6 +309,15 @@ export const MonsterPage=()=>{
             setLoading(false)
         })
     }
+
+    const normFile = (e: any) => {
+        console.log('Upload event:', e);
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return e?.fileList;
+    };
+
     return (
        <>
            <BasePage
@@ -569,6 +593,13 @@ export const MonsterPage=()=>{
                                                >
                                                    <Input placeholder="特质名称"/>
                                                </Form.Item>
+                                               <Form.Item
+                                                   {...field}
+                                                   name={[field.name, 'nameSub']}
+                                                   noStyle
+                                               >
+                                                   <Input placeholder="特质名称2"/>
+                                               </Form.Item>
                                            </Col>
                                            <Col flex={"auto"}>
                                                <Form.Item
@@ -614,7 +645,14 @@ export const MonsterPage=()=>{
                                                    name={[field.name, 'name']}
                                                    noStyle
                                                >
-                                                   <Input placeholder="特质名称"/>
+                                                   <Input placeholder="动作名称"/>
+                                               </Form.Item>
+                                               <Form.Item
+                                                   {...field}
+                                                   name={[field.name, 'nameSub']}
+                                                   noStyle
+                                               >
+                                                   <Input placeholder="动作名称2"/>
                                                </Form.Item>
                                            </Col>
                                            <Col flex={"auto"}>
@@ -649,8 +687,102 @@ export const MonsterPage=()=>{
                            )}
                        </Form.List>
                    </Form.Item>
+                   <Form.Item label={"其他描述"} name={'otherDescription'}>
+                       <Input.TextArea/>
+                   </Form.Item>
                    <Form.Item label={"来源"} name={'fromBook'}>
                        <Select options={bookOptions} showSearch={true}/>
+                   </Form.Item>
+
+                   <Divider size={"small"} titlePlacement={"left"}>配图</Divider>
+                   <Form.Item label={"图片来源"} name={'imageForm'} initialValue={'url'}>
+                       <Radio.Group options={[
+                            {
+                                label: '图片URL',
+                                value: 'url'
+                            },
+                            {
+                                label: '从本地选择',
+                                value: 'local'
+                            }
+                       ]} />
+                   </Form.Item>
+                   <Form.Item label={"图片URL"} name={'imageURL'}
+                              dependencies={['imageForm']}
+                              hidden={monsterValues?.imageForm==='local'}>
+                       <Input/>
+                   </Form.Item>
+                   <Form.Item
+                       name="image"
+                       label="从本地选择"
+                       valuePropName="fileList"
+                       getValueFromEvent={normFile}
+                       dependencies={['imageForm']}
+                       hidden={monsterValues?.imageForm==='url'}
+                   >
+                       <Upload name="logo" listType="picture" accept="image/*" maxCount={1}
+                               beforeUpload={()=>{
+                                   return Promise.reject()
+                               }}
+                       >
+                           <Button icon={<UploadOutlined />}>点击选择图片</Button>
+                       </Upload>
+                   </Form.Item>
+                   <Form.Item label={"图片位置"} extra={"距离右下角"}>
+                       <Row>
+                           <Col span={12}>
+                               <Form.Item name={['imagePosition','x']} label={"X"}>
+                                   <InputNumber/>
+                               </Form.Item>
+                           </Col>
+                           <Col span={12}>
+                               <Form.Item name={['imagePosition','y']} label={"Y"}>
+                                   <InputNumber/>
+                               </Form.Item>
+                           </Col>
+                       </Row>
+                   </Form.Item>
+                   <Form.Item label={"图片大小"}>
+                       <Row>
+                           <Col span={12}>
+                               <Form.Item name={['imageSize','width']} label={"宽度"}>
+                                   <InputNumber/>
+                               </Form.Item>
+                           </Col>
+                           <Col span={12}>
+                               <Form.Item name={['imageSize','height']} label={"高度"}>
+                                   <InputNumber/>
+                               </Form.Item>
+                           </Col>
+                       </Row>
+                   </Form.Item>
+                   <Form.Item name={'imageRotation'} label="图片旋转" extra={"单位：度"}>
+                       <InputNumber/>
+                   </Form.Item>
+                   <Form.Item name={'imageFit'} label={"图片填充模式"}>
+                       <Select options={[
+                            {
+                                label: '填充',
+                                value: 'fill'
+                            },
+                            {
+                                label: '适应',
+                                value: 'contain'
+                            },
+                            {
+                                label: '适应并填充',
+                                value: 'cover'
+                            },
+                            {
+                                label: '不填充',
+                                value: 'none'
+                            },
+                            {
+                                label: '原比例填充',
+                                value: 'scale-down'
+                            }
+                       ]}
+                       />
                    </Form.Item>
                </Form>
            </BasePage>
