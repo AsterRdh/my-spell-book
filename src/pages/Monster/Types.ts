@@ -1,5 +1,5 @@
 import type {Alignment} from "../../compoment/AlignmentSelector/AlignmentSelector.tsx";
-import type {UploadFile} from "antd";
+import type {ImageSelectorType} from "../../compoment/ImageSelector/ImageSelector.tsx";
 
 export type MonsterType='Aberration'|'Beast'|'Celestial'|'Construct'|'Dragon'|'Elemental'|'Fey'|'Fiend'|'Giant'|'Humanoid'|'Monstrosity'|'Ooze'|'Plant'|'Undead';
 export type MonsterSize = 'Tiny'|'Small'|'Medium'|'Large'|'Huge'|'Gargantuan'|'Varies';
@@ -52,19 +52,7 @@ export type Monster={
     languages?:string[]
     feature?:{name:string,nameSub?:string,description:string}[]
     action?:{name:string,nameSub?:string,description:string}[]
-    imageURL?:string
-    image?:	UploadFile[]
-    imageForm?:	'url'|'local'
-    imagePosition?:{
-        x?:number,
-        y?:number
-    },
-    imageSize?:{
-        width?:number,
-        height?:number
-    }
-    imageFit?: 'cover'|'contain'|'fill'|'none'|'scale-down'
-    imageRotation?:number
+    image?:	ImageSelectorType
     otherDescription?:string
     fromBook?:string
 }

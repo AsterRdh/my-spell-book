@@ -1,0 +1,33 @@
+.feature-card{
+    position:relative;
+    background-color:#ffffff;
+    color:#000000;
+    padding: 210px 118px 210px 260px;
+    overflow: hidden;
+    font-size:  42px;
+    display: flex;
+    flex-direction: column;
+    font-family: '霞鹜文楷', sans-serif;
+    border: black  1px solid;
+    .feature-card-title-box {
+        display: flex;
+        align-items: flex-start;
+        line-height: 1;
+        position: relative;
+        .first-litter{
+            text-align: right;
+            font-family: "Solbera Imitation", serif;
+            font-size: 400px;
+            margin-right: 8px;
+            position: relative;
+        }
+        .name{
+            font-family: "Nodesto Caps Condensed", serif;
+            font-size: 126px;
+        }
+        .cn-name{
+            font-family: '方正吕建德行楷', serif;
+            font-size: 112px;
+        }
+    }
+}

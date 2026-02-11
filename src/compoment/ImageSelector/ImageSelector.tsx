@@ -1,4 +1,4 @@
-import {Button, Col, Form, Input, InputNumber, Radio, Row, Select, Upload, type UploadFile} from "antd";
+import {Button, Col, Form, Input, InputNumber, Radio, Row, Select, Switch, Upload, type UploadFile} from "antd";
 import {UploadOutlined} from "@ant-design/icons";
 import {useMemo} from "react";
 export type ImageSelectorType={
@@ -10,11 +10,12 @@ export type ImageSelectorType={
         y?:number
     },
     size?:{
-        width?:number,
-        height?:number
+        width?: string,
+        height?:string,
     }
     fit?: 'cover'|'contain'|'fill'|'none'|'scale-down'
     rotation?:number
+    mask?:boolean
 }
 type ImageSelectorProps<E extends ImageSelectorType> = {
     name: string | string[]
@@ -92,18 +93,21 @@ export default function ImageSelector<E extends ImageSelectorType> (props:ImageS
             <Row>
                 <Col span={12}>
                     <Form.Item name={[...namePath,'size','width']} label={"宽度"}>
-                        <InputNumber/>
+                        <Input/>
                     </Form.Item>
                 </Col>
                 <Col span={12}>
                     <Form.Item name={[...namePath,'size','height']} label={"高度"}>
-                        <InputNumber/>
+                        <Input/>
                     </Form.Item>
                 </Col>
             </Row>
         </Form.Item>
         <Form.Item name={[...namePath,'rotation']} label="图片旋转" extra={"单位：度"}>
             <InputNumber/>
+        </Form.Item>
+        <Form.Item name={[...namePath,'mask']} label="背景遮罩" valuePropName={"checked"} >
+            <Switch/>
         </Form.Item>
         <Form.Item name={[...namePath,'fit']} label={"图片填充模式"}>
             <Select options={[

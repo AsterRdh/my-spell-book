@@ -12,6 +12,8 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import ReactMarkdown from "react-markdown";
 import type {BookType} from "../../types/DataType.ts";
+import type {ImageSelectorType} from "../../compoment/ImageSelector/ImageSelector.tsx";
+import {defaultImageSettings} from "../../compoment/ImageSelector/DefaultData.ts";
 
 type MonsterCardProps = {
     dataSource?: Monster
@@ -68,20 +70,32 @@ const MonsterCard = React.forwardRef((props: MonsterCardProps, ref: React.Ref<HT
         return <div>{bookInfo.source}({bookInfo.name})</div>
     }, [books, dataSource]);
 
-    const {imagePosition,imageSize,imageFit,imageRotation}=dataSource||{}
-    const imageURL = useMemo(() => {
-        if (!dataSource) return undefined;
-        if (!dataSource.imageForm) return undefined;
-        if (dataSource.imageForm==='url'){
-            return dataSource.imageURL
+    const [image,imageURL] = useMemo(() => {
+        const image:ImageSelectorType = {...(dataSource?.image || defaultImageSettings)};
+        if (image.size){
+            //如果为数字则添加默认单位px 使用正则判断
+            let {width,height} = image.size;
+
+            if (width && (width+"").match(/^[\d.]+$/)) width = `${(width+"")}px`;
+            if (height && (height+"").match(/^[\d.]+$/)) height = `${(height+"")}px`;
+            image.size={width, height}
         }
-        if (dataSource.imageForm==='local'){
-            if (dataSource.image && dataSource.image.length>0 ){
-                if (dataSource.image[0].originFileObj)
-                    return URL.createObjectURL(dataSource.image[0].originFileObj)
+
+
+        let imageURL:string|undefined;
+        if (!image || !image.from) {
+            imageURL = undefined
+        }
+        if (image.from==='url'){
+            imageURL = image.url
+        }
+        if (image.from==='local'){
+            if (image.file && image.file.length>0 ){
+                if (image.file[0].originFileObj)
+                    imageURL = URL.createObjectURL(image.file[0].originFileObj)
             }
         }
-        return undefined
+        return [image,imageURL]
     }, [dataSource]);
 
     return(
@@ -219,20 +233,22 @@ const MonsterCard = React.forwardRef((props: MonsterCardProps, ref: React.Ref<HT
             <div style={{position:'absolute', bottom: 150, right: 150,zIndex:30}}>
                 {bookIcon}
             </div>
-            <div style={{position:'absolute', bottom: 0, right: 0,top:0,left:0,backgroundColor:'rgba(255,255,255,0.5)',zIndex:20}}/>
+            {
+                image.mask &&  <div style={{position:'absolute', bottom: 0, right: 0,top:0,left:0,backgroundColor:'rgba(255,255,255,0.5)',zIndex:20}}/>
+            }
             <div style={{position:'absolute',
-                bottom: (imagePosition?.y||0) + 100,
-                right:  (imagePosition?.x||0) + 100,
+                bottom: (image.position?.y||0) + 100,
+                right:  (image.position?.x||0) + 100,
                 zIndex:1}}>
                 {
                     dataSource && imageURL && (
                         <img src={imageURL} alt={dataSource.name}
                              crossOrigin={'anonymous'}
                              style={{
-                                 width: imageSize && imageSize.width || 'auto',
-                                 height: imageSize && imageSize.height || '50%',
-                                 objectFit: imageFit ||'cover',
-                                 transform: `rotate(${imageRotation||0}deg)`
+                                 width: image.size &&  image.size.width || 'auto',
+                                 height:  image.size &&  image.size.height || '50%',
+                                 objectFit: image.fit ||'cover',
+                                 transform: `rotate(${image.rotation||0}deg)`
                         }}
                         />
                     )

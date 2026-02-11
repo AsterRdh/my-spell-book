@@ -1,15 +1,18 @@
 import useNotification from "antd/es/notification/useNotification";
 import React, { useState} from "react";
 import {useDNDBook} from "../../hooks/useDNDBook.tsx";
-import {Form, Input, InputNumber, Select, Space, Spin} from "antd";
+import {Form, Input, InputNumber, Radio, Select, Space, Spin} from "antd";
 import BasePage from "../BasePage.tsx";
-import FeatureCard from "./FeatureCard.tsx";
+import FeatureCard from "../FeaturePage/FeatureCard.tsx";
 import {useForm} from "antd/es/form/Form";
-
 import type {Feature} from "./Types.ts";
 import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
 import ImageSelector from "../../compoment/ImageSelector/ImageSelector.tsx";
+import {DefaultData} from "./DefaultData.ts";
+
 type FeaturePageSetting=PageSetting
+
+
 
 
 const FeaturePage = () => {
@@ -91,9 +94,15 @@ const FeaturePage = () => {
                     }
                 }}
             >
-                <Form form={form}>
+                <Form form={form} initialValues={DefaultData}>
                     <Form.Item label="id" name={'id'}>
                         <Input/>
+                    </Form.Item>
+                    <Form.Item label={'类型'} name={'type'}>
+                        <Radio.Group options={[
+                            {label: '能力', value: 'Ability'},
+                            {label: '专长', value: 'Feats'},
+                        ]}/>
                     </Form.Item>
                     <Form.Item label={"英文名称"} name={"name"}>
                         <Input/>
@@ -104,10 +113,9 @@ const FeaturePage = () => {
                     <Form.Item label={"描述(支持 Markdown 格式)"} name={"description"} layout={'vertical'}>
                         <Input.TextArea rows={10}/>
                     </Form.Item>
-                    <Form.Item label={"插入图片"} name={'image'} >
+                    <Form.Item label={"插入图片"} name={'image'}>
                         <ImageSelector name={['image']} value={featureValues?.image}/>
                     </Form.Item>
-
                     <Form.Item label={"来源"} name={'fromBook'}>
                         <Select options={bookOptions} showSearch={true}/>
                     </Form.Item>

@@ -8,4 +8,5 @@ export type Feature={
     description?:string
     fromBook?:string
     image?:ImageSelectorType
+    type?:'Ability'|'Feats'
 }

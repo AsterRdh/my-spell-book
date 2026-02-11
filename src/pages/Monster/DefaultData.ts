@@ -1,4 +1,5 @@
 import type {Monster} from "./Types.ts";
+import {defaultImageSettings} from "../../compoment/ImageSelector/DefaultData.ts";
 
 export const DefaultData:Monster={
     id:1,
@@ -34,4 +35,5 @@ export const DefaultData:Monster={
     action:[
         {name:'喙啄 Beak',description:'近战武器攻击：命中+4，触及5尺，单一目标。命中：1点穿刺伤害。'}
     ],
+    image:defaultImageSettings
 }

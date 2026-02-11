@@ -6,19 +6,16 @@ import {
     Form,
     Input,
     InputNumber,
-    Radio,
     Row,
     Select,
     Space,
     Spin,
-    Upload,
-    type UploadFile,
 } from "antd";
 import BasePage from "../BasePage.tsx";
 import MonsterCard from "./MonsterCard.tsx";
 import {useForm} from "antd/es/form/Form";
 import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
-import {MinusCircleOutlined, UploadOutlined} from '@ant-design/icons';
+import {MinusCircleOutlined} from '@ant-design/icons';
 import {
     type AbilityType,
     AttributeLang,
@@ -43,6 +40,7 @@ import SavingThrowSelector from "../../compoment/SavingThrowSelector/SavingThrow
 import {useDNDBook} from "../../hooks/useDNDBook.tsx";
 import useNotification from "antd/es/notification/useNotification";
 import {AlignmentLang} from "../../utils/AlignmentUtils.ts";
+import ImageSelector from "../../compoment/ImageSelector/ImageSelector.tsx";
 
 type MonsterPageSetting=PageSetting
 
@@ -326,13 +324,7 @@ export const MonsterPage=()=>{
         })
     }
 
-    const normFile = (e: unknown) => {
-        console.log('Upload event:', e);
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return e && (e as {fileList:UploadFile[]}).fileList;
-    };
+
 
     return (
        <>
@@ -710,94 +702,8 @@ export const MonsterPage=()=>{
                    </Form.Item>
 
                    <Divider size={"small"} titlePlacement={"left"}>配图</Divider>
-                   <Form.Item label={"图片来源"} name={'imageForm'} initialValue={'url'}>
-                       <Radio.Group options={[
-                            {
-                                label: '图片URL',
-                                value: 'url'
-                            },
-                            {
-                                label: '从本地选择',
-                                value: 'local'
-                            }
-                       ]} />
-                   </Form.Item>
-                   <Form.Item label={"图片URL"} name={'imageURL'}
-                              dependencies={['imageForm']}
-                              hidden={monsterValues?.imageForm==='local'}>
-                       <Input/>
-                   </Form.Item>
-                   <Form.Item
-                       name="image"
-                       label="从本地选择"
-                       valuePropName="fileList"
-                       getValueFromEvent={normFile}
-                       dependencies={['imageForm']}
-                       hidden={monsterValues?.imageForm==='url'}
-                   >
-                       <Upload name="logo" listType="picture" accept="image/*" maxCount={1}
-                               beforeUpload={()=>{
-                                   return Promise.reject()
-                               }}
-                       >
-                           <Button icon={<UploadOutlined />}>点击选择图片</Button>
-                       </Upload>
-                   </Form.Item>
-                   <Form.Item label={"图片位置"} extra={"距离右下角"}>
-                       <Row>
-                           <Col span={12}>
-                               <Form.Item name={['imagePosition','x']} label={"X"}>
-                                   <InputNumber/>
-                               </Form.Item>
-                           </Col>
-                           <Col span={12}>
-                               <Form.Item name={['imagePosition','y']} label={"Y"}>
-                                   <InputNumber/>
-                               </Form.Item>
-                           </Col>
-                       </Row>
-                   </Form.Item>
-                   <Form.Item label={"图片大小"}>
-                       <Row>
-                           <Col span={12}>
-                               <Form.Item name={['imageSize','width']} label={"宽度"}>
-                                   <InputNumber/>
-                               </Form.Item>
-                           </Col>
-                           <Col span={12}>
-                               <Form.Item name={['imageSize','height']} label={"高度"}>
-                                   <InputNumber/>
-                               </Form.Item>
-                           </Col>
-                       </Row>
-                   </Form.Item>
-                   <Form.Item name={'imageRotation'} label="图片旋转" extra={"单位：度"}>
-                       <InputNumber/>
-                   </Form.Item>
-                   <Form.Item name={'imageFit'} label={"图片填充模式"}>
-                       <Select options={[
-                            {
-                                label: '填充',
-                                value: 'fill'
-                            },
-                            {
-                                label: '适应',
-                                value: 'contain'
-                            },
-                            {
-                                label: '适应并填充',
-                                value: 'cover'
-                            },
-                            {
-                                label: '不填充',
-                                value: 'none'
-                            },
-                            {
-                                label: '原比例填充',
-                                value: 'scale-down'
-                            }
-                       ]}
-                       />
+                   <Form.Item label={"插入图片"} name={'image'}>
+                       <ImageSelector name={['image']} />
                    </Form.Item>
                </Form>
            </BasePage>
