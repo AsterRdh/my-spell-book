@@ -7,6 +7,7 @@ import {GiSpellBook} from "react-icons/gi";
 import {MdFeaturedPlayList} from "react-icons/md";
 import {FaDragon} from "react-icons/fa";
 import {MonsterPage} from "./pages/Monster/MonsterPage.tsx";
+import FeaturePage from "./pages/Feature/FeaturePage.tsx";
 
 function App() {
     const {isDarkMode} = useTheme()
@@ -18,7 +19,7 @@ function App() {
             case 'SpellBook':
                 return <SpellBook/>;
             case 'Feature':
-                return <div>Feature</div>;
+                return <FeaturePage/>;
             case 'Bestiary':
                 return <MonsterPage />;
             default:

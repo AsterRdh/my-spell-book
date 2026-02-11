@@ -66,7 +66,6 @@ export type Monster={
     imageFit?: 'cover'|'contain'|'fill'|'none'|'scale-down'
     imageRotation?:number
     otherDescription?:string
-
     fromBook?:string
 }
 

@@ -1,5 +1,19 @@
 import React, {useState} from "react";
-import {Button, Col, Divider, Form, Input, InputNumber, Radio, Row, Select, Space, Spin, Upload,} from "antd";
+import {
+    Button,
+    Col,
+    Divider,
+    Form,
+    Input,
+    InputNumber,
+    Radio,
+    Row,
+    Select,
+    Space,
+    Spin,
+    Upload,
+    type UploadFile,
+} from "antd";
 import BasePage from "../BasePage.tsx";
 import MonsterCard from "./MonsterCard.tsx";
 import {useForm} from "antd/es/form/Form";
@@ -55,14 +69,16 @@ const getDataWithPS=(data?:string)=>{
 }
 
 export const MonsterPage=()=>{
-    const [notification, message] = useNotification();
-    const [form] = useForm<Monster>()
-    const monsterValues = Form.useWatch([], form);
-    const [loading, setLoading] = useState(false)
 
+    const [notification, message] = useNotification();
+    const [loading, setLoading] = useState(false);
+    const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
     const {books,bookOptions} = useDNDBook(notification);
 
-    const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
+    const [form] = useForm<Monster>()
+    const monsterValues = Form.useWatch([], form);
+
+
     const [settingForm] = useForm<MonsterPageSetting>()
 
     const handleImport = (imputData?: string) => {
@@ -310,12 +326,12 @@ export const MonsterPage=()=>{
         })
     }
 
-    const normFile = (e: any) => {
+    const normFile = (e: unknown) => {
         console.log('Upload event:', e);
         if (Array.isArray(e)) {
             return e;
         }
-        return e?.fileList;
+        return e && (e as {fileList:UploadFile[]}).fileList;
     };
 
     return (
@@ -348,8 +364,7 @@ export const MonsterPage=()=>{
 
                }}
                preViewButtonRender={() => {
-                   return [
-                   ];
+                   return [];
                }}
                preViewBottomRender={()=>{
                    return <Space>
