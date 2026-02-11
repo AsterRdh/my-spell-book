@@ -41,4 +41,4 @@ MIT License
 
 ---
 
-如有问题，请联系 [你的邮箱或 GitHub 主页链接]。
+如有问题，请联系 [asterrdh@live.cn](mailto://asterrdh@live.cn)。
