@@ -1,73 +1,44 @@
-# React + TypeScript + Vite
+# My Spell Book
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+这是一个基于 React + TypeScript + Vite 构建的 TRPG（桌上角色扮演游戏）工具应用，主要用于对法术书、怪物图鉴和角色特性进行快速打印排版。
 
-Currently, two official plugins are available:
+当前项目的预览地址：[https://cyberaster.space/SpellBook/](https://cyberaster.space/SpellBook/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 功能特性
 
-## React Compiler
+- **法术书管理**  
+  支持创建、编辑和导出法术卡片，包含法术名称、等级、学派、施法时间、范围、持续时间等详细信息，并支持 Markdown 语法描述。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **怪物图鉴**  
+  提供怪物数据录入与展示功能，包括属性、技能、感官、语言、挑战等级等信息，并支持特性描述。
 
-## Expanding the ESLint configuration
+- **角色特性管理**  
+  可记录角色的能力、专长等特性，并支持图文混排展示。
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **数据导出**  
+  支持将法术卡片、怪物卡片等内容导出为 PNG 图片格式。
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ 技术栈
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **前端框架**: React 18
+- **语言**: TypeScript
+- **构建工具**: Vite
+- **UI 库**: Ant Design
+- **样式**: CSS Modules / 内联样式
+- **图标库**: React Icons
+- **Markdown 解析**: React Markdown + Remark + Rehype
+- **截图工具**: html2canvas
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📄 许可证
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+MIT License
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🌟 致谢
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- D&D 团队和不全书贡献者
+- Ant Design 团队
+- React 社区
+
+---
+
+如有问题，请联系 [你的邮箱或 GitHub 主页链接]。
