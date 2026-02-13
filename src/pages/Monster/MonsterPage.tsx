@@ -64,7 +64,7 @@ const getDataWithPS=(data?:string)=>{
     return [ac,acPS]
 }
 
-export const MonsterPage=()=>{
+const MonsterPage=()=>{
     const {setLoading,dndBook} = useContext(AppContext)
     const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
     const {books,bookOptions} = dndBook;
@@ -712,3 +712,4 @@ export const MonsterPage=()=>{
 
     )
 }
+export default MonsterPage;

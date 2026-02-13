@@ -6,7 +6,7 @@ import {
     type PageSetting, SizeScaling
 } from "../../types/DataType.ts";
 import {Button, Col, Form,  InputNumber,   Select, Space} from "antd";
-import {useContext, useMemo, useState} from "react";
+import { useContext, useMemo, useState} from "react";
 import {defaultBook, defaultData} from "./DefaultData.ts";
 
 import SpellCard from "./compoments/SpellCard.tsx";
@@ -14,7 +14,6 @@ import SpellForm from "./compoments/SpellForm.tsx";
 import './SpellBook.css'
 import BasePage from "../BasePage.tsx";
 import {AppContext} from "../../AppContext.ts";
-
 
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
@@ -27,7 +26,6 @@ const toURLSearchParams = <T extends mapType>(record: T) => {
     return params;
 };
 type SpellBookSetting = PageSetting
-
 
 export default function SpellBook() {
     const {notification,dndBook,dndSpellSchool} = useContext(AppContext)
@@ -224,6 +222,7 @@ export default function SpellBook() {
 
         }
     };
+
     const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
     const [settingForm] = useForm<SpellBookSetting>()
 
