@@ -3,7 +3,7 @@ import React, { useState} from "react";
 import {useDNDBook} from "../../hooks/useDNDBook.tsx";
 import {Form, Input, InputNumber, Radio, Select, Space, Spin} from "antd";
 import BasePage from "../BasePage.tsx";
-import FeatureCard from "../FeaturePage/FeatureCard.tsx";
+import FeatureCard from ".//FeatureCard.tsx";
 import {useForm} from "antd/es/form/Form";
 import type {Feature} from "./Types.ts";
 import {type PageSetting, SizeScaling} from "../../types/DataType.ts";

@@ -397,10 +397,8 @@ export const MonsterPage=()=>{
                        })
                    }
                }}
-
                buttonRender={function (): React.ReactNode | React.ReactNode[] {return []}}
                handleImport={handleImport}
-
            >
                <Form form={form} initialValues={DefaultData}>
                    <Form.Item name="id" label={"ID"} hidden={ true}>
@@ -510,6 +508,7 @@ export const MonsterPage=()=>{
                                            <Col span={8}>
                                                <Form.Item
                                                    {...field}
+                                                   key={'senses'+field.key+".type"}
                                                    name={[field.name, 'type']}
                                                    noStyle
                                                >
@@ -519,6 +518,7 @@ export const MonsterPage=()=>{
                                            <Col flex={"auto"}>
                                                <Form.Item
                                                    {...field}
+                                                   key={'senses'+field.key+".value"}
                                                    name={[field.name, 'value']}
                                                    noStyle
                                                >
@@ -557,6 +557,7 @@ export const MonsterPage=()=>{
                                            <Col flex={"auto"}>
                                                <Form.Item
                                                    {...field}
+                                                   key={'languages'+field.key+".value"}
                                                    noStyle
                                                >
                                                    <Input placeholder="输入语言"  />
@@ -595,6 +596,7 @@ export const MonsterPage=()=>{
                                            <Col span={8}>
                                                <Form.Item
                                                    {...field}
+                                                   key={'feature'+field.key+".name"}
                                                    name={[field.name, 'name']}
                                                    noStyle
                                                >
@@ -602,6 +604,7 @@ export const MonsterPage=()=>{
                                                </Form.Item>
                                                <Form.Item
                                                    {...field}
+                                                   key={'feature'+field.key+".nameSub"}
                                                    name={[field.name, 'nameSub']}
                                                    noStyle
                                                >
@@ -611,6 +614,7 @@ export const MonsterPage=()=>{
                                            <Col flex={"auto"}>
                                                <Form.Item
                                                    {...field}
+                                                   key={'feature'+field.key+".description"}
                                                    name={[field.name, 'description']}
                                                    noStyle
                                                >
@@ -649,6 +653,7 @@ export const MonsterPage=()=>{
                                            <Col span={8}>
                                                <Form.Item
                                                    {...field}
+                                                   key={'action'+field.key+".name"}
                                                    name={[field.name, 'name']}
                                                    noStyle
                                                >
@@ -656,6 +661,7 @@ export const MonsterPage=()=>{
                                                </Form.Item>
                                                <Form.Item
                                                    {...field}
+                                                   key={'action'+field.key+".nameSub"}
                                                    name={[field.name, 'nameSub']}
                                                    noStyle
                                                >
@@ -665,6 +671,7 @@ export const MonsterPage=()=>{
                                            <Col flex={"auto"}>
                                                <Form.Item
                                                    {...field}
+                                                   key={'action'+field.key+".description"}
                                                    name={[field.name, 'description']}
                                                    noStyle
                                                >

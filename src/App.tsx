@@ -7,7 +7,7 @@ import {GiSpellBook} from "react-icons/gi";
 import {MdFeaturedPlayList} from "react-icons/md";
 import {FaDragon, FaGithub} from "react-icons/fa";
 import {MonsterPage} from "./pages/Monster/MonsterPage.tsx";
-import FeaturePage from "./pages/FeaturePage/FeaturePage.tsx";
+import FeaturePage from "./pages/Feature/FeaturePage.tsx";
 
 function App() {
     const {isDarkMode} = useTheme()

@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react"
+import {useEffect, useState} from "react"
 
 export type ThemeName = "light" | "dark"
 
+// 提取主题初始化逻辑
+function getInitialTheme(): ThemeName {
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        return "dark"
+    }
+    return "light"
+}
+
 function useTheme() {
-    const [themeName, setThemeName] = useState<ThemeName>("light")
+    const [themeName, setThemeName] = useState<ThemeName>(getInitialTheme())
     useEffect(() => {
-        // 设置初始皮肤
-        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            setThemeName("dark")
-        } else {
-            setThemeName("light")
-        }
         // 监听系统颜色切换
         window
             .matchMedia("(prefers-color-scheme: dark)")

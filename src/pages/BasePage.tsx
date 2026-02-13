@@ -1,15 +1,16 @@
-import React, {useRef, useState} from "react";
+import React, {useMemo, useRef, useState} from "react";
 import html2canvas from "html2canvas";
 import {Button, Col,  Input,  Modal, Row,  Slider, Space} from "antd";
 import type {NotificationInstance} from "antd/es/notification/interface";
 import { IoMdSettings } from "react-icons/io";
+import {useLocalStorageState} from "ahooks";
 
 type MonsterPageProps = {
     preViewRender:(ref:React.RefObject<HTMLDivElement|null>)=>React.ReactNode
     exportNameGetter:()=>string
     preViewButtonRender:()=>React.ReactNode|React.ReactNode[]
     preViewBottomRender:()=>React.ReactNode|React.ReactNode[]
-    buttonRender:()=>React.ReactNode|React.ReactNode[]
+    buttonRender?:()=>React.ReactNode|React.ReactNode[]
     handleImport:(inputData?:string)=>Promise<unknown>
     settingRender:()=>React.ReactNode|React.ReactNode[],
     afterSettingModalOpenChange:(open:boolean)=>void
@@ -26,9 +27,8 @@ const BasePage=(props:MonsterPageProps)=>{
     const {afterSettingModalOpenChange,onSettingSave} = props
     const {settingRender} = props
 
+    const [scale, setScale] = useLocalStorageState('scale', {defaultValue: 100});
 
-
-    const [scale, setScale] = useState(100)
     const canvasRef = useRef<HTMLDivElement>(null);
     const handleConvert = () => {
         if (canvasRef.current){
@@ -61,6 +61,14 @@ const BasePage=(props:MonsterPageProps)=>{
     const [openImportModal, setOpenImportModal] = useState(false)
     const [importData, setImportData] = useState<string>()
     const [showSettingModal, setShowSettingModal] = useState(false)
+
+    const rightButtons = useMemo(()=>{
+        if (!buttonRender) return  <Col flex={"auto"}/>
+        const rightButtons = buttonRender()
+        if (!rightButtons) return <Col flex={"auto"}/>
+        if (Array.isArray(rightButtons) && rightButtons.length === 0) return <Col flex={"auto"}/>
+        return rightButtons
+    },[buttonRender])
 
     return (
         <>
@@ -104,10 +112,8 @@ const BasePage=(props:MonsterPageProps)=>{
                             <Button key={'import'} onClick={() => {
                                 setOpenImportModal(true)
                             }}>从不全书导入</Button>
-                            {buttonRender()}
                         </Col>
-
-                        <Col flex={"auto"}/>
+                        {rightButtons}
                         <Col>
                             <Button onClick={handleConvert}>
                                 导出为图片

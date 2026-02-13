@@ -6,17 +6,16 @@ import {
     type SelectOptionType,
     type PageSetting, SizeScaling
 } from "../../types/DataType.ts";
-import {Button, Col, Form, Input, InputNumber, Modal, Row, Select, Slider, Space, Spin} from "antd";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {Button, Col, Form,  InputNumber,   Select, Space, Spin} from "antd";
+import {useEffect, useMemo, useState} from "react";
 import useNotification from "antd/es/notification/useNotification";
-import html2canvas from "html2canvas";
 import {defaultBook, defaultData} from "./DefaultData.ts";
 
 import SpellCard from "./compoments/SpellCard.tsx";
 import SpellForm from "./compoments/SpellForm.tsx";
 import './SpellBook.css'
-import {IoMdSettings} from "react-icons/io";
 import {useDNDBook} from "../../hooks/useDNDBook.tsx";
+import BasePage from "../BasePage.tsx";
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
 type mapType= Record<string, string>;
@@ -33,47 +32,14 @@ type SpellBookSetting = PageSetting
 export default function SpellBook() {
     const [form] = useForm<SpellType>();
     const spellValues = Form.useWatch([], form);
-    const okSave = useMemo(() => {
-        return  !spellValues || spellValues.name !== 'Spell'
-    }, [spellValues]);
+    const okSave = useMemo(() => {return  !spellValues || spellValues.name !== 'Spell'}, [spellValues]);
 
     const [notification, message] = useNotification();
     const [loading, setLoading] = useState(false)
 
-    const canvasRef = useRef<HTMLDivElement>(null);
-    const handleConvert = () => {
-        if (canvasRef.current){
-            setLoading(true)
-            // 创建一个临时容器，不包含缩放效果
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.transform = 'scale(1)';
-            document.body.appendChild(tempContainer);
-
-            // 克隆 SpellCard 组件内容到临时容器
-            const clonedComponent = canvasRef.current.cloneNode(true) as HTMLElement;
-            tempContainer.appendChild(clonedComponent);
-            html2canvas(clonedComponent, {useCORS: true,}).then((canvas) => {
-                const link = document.createElement("a");
-                link.download = (spellValues.name||'spell')+" "+(spellValues.cnName||'法术')+ ".png";
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-                // 清理临时元素
-                document.body.removeChild(tempContainer);
-            }).finally(()=>{
-                setLoading(false)
-            });
-        }
-    };
-
-    const [openImportModal, setOpenImportModal] = useState(false)
-    const [importData, setImportData] = useState<string>()
-
-    const handleImport = () => {
+    const handleImport = (importData?:string) => {
         if (!importData) {
-            setOpenImportModal(false)
-            return;
+            return Promise.resolve();
         }
         try{
             const lines = importData.split('\n');
@@ -193,20 +159,18 @@ export default function SpellBook() {
                 fromBookID:defaultBook.id
             }
             form.setFieldsValue(spell)
-            setOpenImportModal(false)
+            return Promise.resolve();
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         }catch  (_unused_error: unknown){
+
             notification.error({
                 title: '导入失败',
                 description: '请检查输入的法术信息是否正确'
             })
+            return Promise.reject()
         }
 
     }
-
-    const [scale, setScale] = useState(100)
-
-
     const {books,bookOptions} = useDNDBook(notification);
 
     const [schools, setSchools] = useState<{[key:string]:SpellSchoolType}>({})
@@ -241,15 +205,9 @@ export default function SpellBook() {
             setLoading(false)
         })
     },[])
-
-
     const [searchData, setSearchData] = useState<SelectOptionType<SpellType>[]>([]);
     const [searchValue, setSearchValue] = useState<string>();
-
-    const handleSearch = (newValue: string) => {
-        fetchSearchData(newValue, setSearchData);
-    };
-
+    const handleSearch = (newValue: string) => {fetchSearchData(newValue, setSearchData);};
     const fetchSearchData = (value: string, callback: (data: SelectOptionType<SpellType>[]) => void) => {
         if (timeout) {
             clearTimeout(timeout);
@@ -282,7 +240,6 @@ export default function SpellBook() {
             callback([]);
         }
     };
-
     const handleChange = (newValue: string,option?: SelectOptionType<SpellType> | SelectOptionType<SpellType> []) => {
         setSearchValue(newValue);
         if(option){
@@ -299,56 +256,71 @@ export default function SpellBook() {
 
         }
     };
-    const [showSettingModal, setShowSettingModal] = useState(false)
     const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
     const [settingForm] = useForm<SpellBookSetting>()
 
+
     return (
         <>
-            <div className={'app-left'}>
-                <div className={'view-box'} >
-                    <div className={'view'}>
-                        <div className={'pre-view'} style={{transform: "scale(" + (scale / 100) + ")"}}>
-                            <SpellCard spell={spellValues}
-                                       ref={canvasRef}
-                                       dataSet={{
-                                           schools: schools,
-                                           books: books
-                                       }}
-                                       size={[SizeScaling[0]*pageSize[0], SizeScaling[1]*pageSize[1]]}
-                            />
+            <BasePage
+                notification={ notification} setLoading={setLoading}
+                preViewRender={(ref) => {
+                    return <SpellCard spell={spellValues}
+                               ref={ref}
+                               dataSet={{
+                                   schools: schools,
+                                   books: books
+                               }}
+                               size={[SizeScaling[0]*pageSize[0], SizeScaling[1]*pageSize[1]]}
+                    />
+                }}
+                exportNameGetter={() => {
+                    return spellValues.name + " " + spellValues.cnName
+                }}
+                preViewButtonRender={() => {
+                    return [];
+                }}
+                preViewBottomRender={()=>{
+                    return <Space>
+                        <div style={{marginLeft: '1rem'}}>
+                            {pageSize[0]}×{pageSize[1]}(cm)
                         </div>
-                    </div>
-                    <div className={'view-tool'}>
-                        <Space vertical={true} >
-                            <Button variant="filled" icon={<IoMdSettings />} onClick={()=>setShowSettingModal(true)} />
-                        </Space>
-                    </div>
-                </div>
-                <div>
-                    <Row align={"middle"} >
-                        <Col >
-                            <div style={{marginLeft: '1rem'}}>
-                                {pageSize[0]}×{pageSize[1]}(cm)
-                            </div>
-                        </Col>
-                        <Col flex={"auto"}/>
-                        <Col>
+                    </Space>
+                }}
+                settingRender={() => {
+                    return<Form<SpellBookSetting>
+                        form={settingForm}
+                        initialValues={{pageSize: {width: 10, height: 12.8}}}
+                        onFinish={setting=>{
+                            const {width, height} = setting.pageSize;
+                            setPageSize([width, height])
+                        }}
+                    >
+                        <Form.Item label="页面大小" >
                             <Space>
-                                缩放
-                                <Slider style={{width: 200}} value={scale} onChange={(value) => setScale(value)}
-                                        max={100} min={25}/>
-                                <div style={{width: '3rem', textAlign: "right", paddingRight: '1rem'}}>
-                                    {scale}%
-                                </div>
+                                <Form.Item label={'宽'} name={['pageSize','width']} noStyle>
+                                    <InputNumber prefix="宽：" suffix="CM" style={{width: '8rem'}} />
+                                </Form.Item>
+                                <Form.Item label={'高'} name={['pageSize','height']} noStyle>
+                                    <InputNumber prefix="高：" suffix="CM"  style={{width: '8rem'}} />
+                                </Form.Item>
                             </Space>
-                        </Col>
-                    </Row>
-                </div>
-            </div>
-            <div className={'app-right'}>
-                <div style={{textAlign: 'right', padding: '24px'}}>
-                    <Row gutter={[8, 0]}>
+                        </Form.Item>
+                    </Form>;
+                }}
+                onSettingSave={()=>{
+                    settingForm.submit();
+                    return Promise.resolve();
+                }}
+                afterSettingModalOpenChange={(open) => {
+                    if (!open) {
+                        settingForm.setFieldsValue({
+                            pageSize: {width: pageSize[0], height: pageSize[1]}
+                        })
+                    }
+                }}
+                buttonRender={()=>{
+                    return <>
                         <Col>
                             <Button onClick={() => {
                                 form.submit()
@@ -380,84 +352,19 @@ export default function SpellBook() {
                             />
 
                         </Col>
-                        <Col>
-                            <Button onClick={() => {
-                                setOpenImportModal(true)
-                            }}>
-                                快速导入
-                            </Button>
-                        </Col>
-                        <Col>
-                            <Button onClick={handleConvert}>
-                                导出为图片
-                            </Button>
-                        </Col>
-                    </Row>
-                </div>
-                <div style={{flex: 1, overflowY: 'scroll', overflowX: 'hidden', padding: '0 24px'}}>
-                    <SpellForm
-                        form={form}
-                        schoolOptions={schoolOptions}
-                        bookOptions={bookOptions}
-                        initialValues={defaultData}
-                    />
 
-                </div>
-            </div>
-            <Modal title="快速导入"
-                   open={openImportModal}
-                   onCancel={() => {
-                       setOpenImportModal(false)
-                   }}
-                   onOk={handleImport}
-                   afterClose={() => {
-                       setImportData(undefined)
-                   }}
-                   okText={'导入'}
+                    </>
+                }}
+                handleImport={handleImport}
+
             >
-                <div>
-                    <Input.TextArea value={importData} onChange={(e) => {
-                        setImportData(e.target.value)
-                    }}
-                                    rows={15}
-                    />
-                </div>
-            </Modal>
-            <Modal title="设置"
-                   open={showSettingModal}
-                   onCancel={() => {
-                       setShowSettingModal(false)
-                   }}
-                   onOk={() => {
-                       settingForm.submit()
-                   }}
-                   afterOpenChange={() => {
-                       settingForm.setFieldsValue({
-                           pageSize: {width: pageSize[0], height: pageSize[1]}
-                       })
-                   }}
-            >
-                <Form<SpellBookSetting>
-                    form={settingForm}
-                    initialValues={{pageSize: {width: 10, height: 12.8}}}
-                    onFinish={setting=>{
-                        const {width, height} = setting.pageSize;
-                        setPageSize([width, height])
-                        setShowSettingModal(false)
-                    }}
-                >
-                    <Form.Item label="页面大小" >
-                        <Space>
-                            <Form.Item label={'宽'} name={['pageSize','width']} noStyle>
-                                <InputNumber prefix="宽：" suffix="CM" style={{width: '8rem'}} />
-                            </Form.Item>
-                            <Form.Item label={'高'} name={['pageSize','height']} noStyle>
-                                <InputNumber prefix="高：" suffix="CM"  style={{width: '8rem'}} />
-                            </Form.Item>
-                        </Space>
-                    </Form.Item>
-                </Form>
-            </Modal>
+                <SpellForm
+                    form={form}
+                    schoolOptions={schoolOptions}
+                    bookOptions={bookOptions}
+                    initialValues={defaultData}
+                />
+            </BasePage>
             {message}
             <Spin fullscreen={true} spinning={loading}/>
         </>
