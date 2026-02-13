@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {
     Button,
     Col,
@@ -9,7 +9,6 @@ import {
     Row,
     Select,
     Space,
-    Spin,
 } from "antd";
 import BasePage from "../BasePage.tsx";
 import MonsterCard from "./MonsterCard.tsx";
@@ -37,10 +36,9 @@ import AlignmentSelector, {
 import SkillSelector from "../../compoment/SkillSelector/SkillSelector.tsx";
 import SpeedSelector from "../../compoment/SpeedSelector/SpeedSelector.tsx";
 import SavingThrowSelector from "../../compoment/SavingThrowSelector/SavingThrowSelector.tsx";
-import {useDNDBook} from "../../hooks/useDNDBook.tsx";
-import useNotification from "antd/es/notification/useNotification";
 import {AlignmentLang} from "../../utils/AlignmentUtils.ts";
 import ImageSelector from "../../compoment/ImageSelector/ImageSelector.tsx";
+import {AppContext} from "../../AppContext.ts";
 
 type MonsterPageSetting=PageSetting
 
@@ -67,15 +65,12 @@ const getDataWithPS=(data?:string)=>{
 }
 
 export const MonsterPage=()=>{
-
-    const [notification, message] = useNotification();
-    const [loading, setLoading] = useState(false);
+    const {setLoading,dndBook} = useContext(AppContext)
     const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
-    const {books,bookOptions} = useDNDBook(notification);
+    const {books,bookOptions} = dndBook;
 
     const [form] = useForm<Monster>()
     const monsterValues = Form.useWatch([], form);
-
 
     const [settingForm] = useForm<MonsterPageSetting>()
 
@@ -329,7 +324,6 @@ export const MonsterPage=()=>{
     return (
        <>
            <BasePage
-               notification={ notification} setLoading={setLoading}
                preViewRender={(ref) => {
                    return <MonsterCard ref={ref}
                                        dataSource={monsterValues}
@@ -714,8 +708,6 @@ export const MonsterPage=()=>{
                    </Form.Item>
                </Form>
            </BasePage>
-           {message}
-           <Spin fullscreen={true} spinning={loading}/>
        </>
 
     )

@@ -1,8 +1,9 @@
 import type {AjaxResultType, BookType, SelectOptionType} from "../types/DataType.ts";
-import {useEffect, useState} from "react";
-import type {NotificationInstance} from "antd/es/notification/interface";
+import {useContext, useEffect, useState} from "react";
+import {AppContext} from "../AppContext.ts";
 
-const useDNDBook=(notification?:NotificationInstance)=>{
+const useDNDBook=()=>{
+    const {notification} = useContext(AppContext)
     const [books, setBooks] = useState<{[key:string]:BookType}>({})
     const [bookOptions, setBookOptions] = useState<SelectOptionType<BookType>[]>([])
     const loadBook = () => {

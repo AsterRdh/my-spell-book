@@ -1,21 +1,21 @@
 import {useForm} from "antd/es/form/Form";
 import {
     type AjaxResultType,
-    type SpellSchoolType,
     type SpellType,
     type SelectOptionType,
     type PageSetting, SizeScaling
 } from "../../types/DataType.ts";
-import {Button, Col, Form,  InputNumber,   Select, Space, Spin} from "antd";
-import {useEffect, useMemo, useState} from "react";
-import useNotification from "antd/es/notification/useNotification";
+import {Button, Col, Form,  InputNumber,   Select, Space} from "antd";
+import {useContext, useMemo, useState} from "react";
 import {defaultBook, defaultData} from "./DefaultData.ts";
 
 import SpellCard from "./compoments/SpellCard.tsx";
 import SpellForm from "./compoments/SpellForm.tsx";
 import './SpellBook.css'
-import {useDNDBook} from "../../hooks/useDNDBook.tsx";
 import BasePage from "../BasePage.tsx";
+import {AppContext} from "../../AppContext.ts";
+
+
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
 type mapType= Record<string, string>;
@@ -30,12 +30,11 @@ type SpellBookSetting = PageSetting
 
 
 export default function SpellBook() {
+    const {notification,dndBook,dndSpellSchool} = useContext(AppContext)
+
     const [form] = useForm<SpellType>();
     const spellValues = Form.useWatch([], form);
     const okSave = useMemo(() => {return  !spellValues || spellValues.name !== 'Spell'}, [spellValues]);
-
-    const [notification, message] = useNotification();
-    const [loading, setLoading] = useState(false)
 
     const handleImport = (importData?:string) => {
         if (!importData) {
@@ -163,7 +162,7 @@ export default function SpellBook() {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         }catch  (_unused_error: unknown){
 
-            notification.error({
+            notification?.error({
                 title: '导入失败',
                 description: '请检查输入的法术信息是否正确'
             })
@@ -171,40 +170,9 @@ export default function SpellBook() {
         }
 
     }
-    const {books,bookOptions} = useDNDBook(notification);
+    const {books,bookOptions} = dndBook;
+    const {schools,schoolOptions} = dndSpellSchool;
 
-    const [schools, setSchools] = useState<{[key:string]:SpellSchoolType}>({})
-    const [schoolOptions, setSchoolOptions] = useState<SelectOptionType<SpellSchoolType>[]>([])
-    const loadSchool = () => {
-        return fetch('/SpellBook/dnd/getSpellSchool')
-            .then(res=>res.json())
-            .then( (data:AjaxResultType<{[key:string]:SpellSchoolType}>)=>{
-                if (data.success){
-                    const schoolData = data.data
-                    setSchools(schoolData)
-                    const options:SelectOptionType<SpellSchoolType>[]=Object.values(schoolData).map(school=>{
-                        const option:SelectOptionType<SpellSchoolType> = {
-                            label:school.name,
-                            value:school.id,
-                            data:school
-                        }
-                        return option
-                    });
-                    setSchoolOptions(options)
-                }
-            })
-
-    };
-
-    useEffect(()=>{
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLoading(true)
-        Promise.all([
-            loadSchool(),
-        ]).finally(()=>{
-            setLoading(false)
-        })
-    },[])
     const [searchData, setSearchData] = useState<SelectOptionType<SpellType>[]>([]);
     const [searchValue, setSearchValue] = useState<string>();
     const handleSearch = (newValue: string) => {fetchSearchData(newValue, setSearchData);};
@@ -263,7 +231,6 @@ export default function SpellBook() {
     return (
         <>
             <BasePage
-                notification={ notification} setLoading={setLoading}
                 preViewRender={(ref) => {
                     return <SpellCard spell={spellValues}
                                ref={ref}
@@ -365,8 +332,6 @@ export default function SpellBook() {
                     initialValues={defaultData}
                 />
             </BasePage>
-            {message}
-            <Spin fullscreen={true} spinning={loading}/>
         </>
     )
 }

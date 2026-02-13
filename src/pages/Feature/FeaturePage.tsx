@@ -1,7 +1,5 @@
-import useNotification from "antd/es/notification/useNotification";
-import React, { useState} from "react";
-import {useDNDBook} from "../../hooks/useDNDBook.tsx";
-import {Form, Input, InputNumber, Radio, Select, Space, Spin} from "antd";
+import React, {useContext, useState} from "react";
+import {Form, Input, InputNumber, Radio, Select, Space} from "antd";
 import BasePage from "../BasePage.tsx";
 import FeatureCard from ".//FeatureCard.tsx";
 import {useForm} from "antd/es/form/Form";
@@ -9,6 +7,7 @@ import type {Feature} from "./Types.ts";
 import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
 import ImageSelector from "../../compoment/ImageSelector/ImageSelector.tsx";
 import {DefaultData} from "./DefaultData.ts";
+import {AppContext} from "../../AppContext.ts";
 
 type FeaturePageSetting=PageSetting
 
@@ -16,11 +15,9 @@ type FeaturePageSetting=PageSetting
 
 
 const FeaturePage = () => {
-
-    const [notification, message] = useNotification();
-    const [loading, setLoading] = useState(false);
+    const {dndBook} = useContext(AppContext)
     const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
-    const {books,bookOptions} = useDNDBook(notification);
+    const {books,bookOptions} = dndBook;
 
     const [form] = useForm<Feature>()
     const featureValues = Form.useWatch([], form);
@@ -75,7 +72,6 @@ const FeaturePage = () => {
                         })
                     }
                 }}
-                notification={ notification} setLoading={setLoading}
                 buttonRender={function (): React.ReactNode | React.ReactNode[] {return []}}
                 handleImport={handleImport}
                 exportNameGetter={()=>{
@@ -121,10 +117,6 @@ const FeaturePage = () => {
                     </Form.Item>
                 </Form>
             </BasePage>
-
-
-            {message}
-            <Spin fullscreen={true} spinning={loading}/>
         </>
     )
 }

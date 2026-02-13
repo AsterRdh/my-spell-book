@@ -42,7 +42,7 @@ export default function ImageSelector<E extends ImageSelectorType> (props:ImageS
 
 
     return <>
-        <Form.Item label={"图片来源"} name={[...namePath,'from']} initialValue={'url'} >
+        <Form.Item label={"图片来源"} name={[...namePath,'from']}  >
             <Radio.Group options={[
                 {
                     label: '图片URL',

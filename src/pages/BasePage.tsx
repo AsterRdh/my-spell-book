@@ -1,9 +1,9 @@
-import React, {useMemo, useRef, useState} from "react";
+import React, {useContext, useMemo, useRef, useState} from "react";
 import html2canvas from "html2canvas";
 import {Button, Col,  Input,  Modal, Row,  Slider, Space} from "antd";
-import type {NotificationInstance} from "antd/es/notification/interface";
 import { IoMdSettings } from "react-icons/io";
 import {useLocalStorageState} from "ahooks";
+import {AppContext} from "../AppContext.ts";
 
 type MonsterPageProps = {
     preViewRender:(ref:React.RefObject<HTMLDivElement|null>)=>React.ReactNode
@@ -16,14 +16,14 @@ type MonsterPageProps = {
     afterSettingModalOpenChange:(open:boolean)=>void
     onSettingSave:()=>Promise<void>
     children:React.ReactNode
-    notification:NotificationInstance
-    setLoading:(loading:boolean)=>void
 };
 
 const BasePage=(props:MonsterPageProps)=>{
     const {preViewRender,exportNameGetter,preViewButtonRender,preViewBottomRender,buttonRender,children} = props
+
+    const {setLoading,notification} = useContext(AppContext)
+
     const {handleImport} = props
-    const {notification,setLoading} = props
     const {afterSettingModalOpenChange,onSettingSave} = props
     const {settingRender} = props
 
@@ -133,7 +133,7 @@ const BasePage=(props:MonsterPageProps)=>{
                    onOk={()=>{
                        handleImport(importData).then(()=>{setOpenImportModal(false)})
                            .catch((e: Error)=>{
-                               notification.error({
+                               notification?.error({
                                    title: '导入失败',
                                    description: e.message,
                                })
@@ -155,7 +155,7 @@ const BasePage=(props:MonsterPageProps)=>{
                        onSettingSave().then(() => {
                            setShowSettingModal(false)
                        }).catch((e: Error)=>{
-                           notification.error({
+                           notification?.error({
                                title: '保存设置失败',
                                description: e.message,
                            })
