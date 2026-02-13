@@ -8,11 +8,7 @@ import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
 import ImageSelector from "../../compoment/ImageSelector/ImageSelector.tsx";
 import {DefaultData} from "./DefaultData.ts";
 import {AppContext} from "../../AppContext.ts";
-
 type FeaturePageSetting=PageSetting
-
-
-
 
 const FeaturePage = () => {
     const {dndBook} = useContext(AppContext)
