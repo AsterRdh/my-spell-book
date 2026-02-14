@@ -1,28 +1,46 @@
-import type {CharacterClass} from "../../hooks/useCharacterClass.ts";
-import type {SkillType} from "../Monster/Types.ts";
-type CharacterAbility={
-    value?:number
-    Saving?:boolean
-}
-type CharacterSkill={
-    type: SkillType,
-    proficiency?: false| 'JAT' |'proficiency'|'expertise'
-    otherValue: number
-}
+
+import type {CharacterClassType} from "../../compoment/ClassInput/ClassInput.tsx";
+import type {CharacterAbilityType} from "../../compoment/AbilityInput/AbilityInput.tsx";
+import type { CharacterSkill } from "../../compoment/SkillInput/SkillInput.tsx";
+
+
+
 export type Character={
     name?:string;
-    classes?:{
-        classID:CharacterClass
-        level:number
-    };
+    playerName?:string;
+    races?:string;
+    classes?:CharacterClassType[];
     proficiencyBonus:number
     ability?: {
-        pow: CharacterAbility,
-        dex: CharacterAbility,
-        con: CharacterAbility,
-        int: CharacterAbility,
-        wis: CharacterAbility,
-        cha: CharacterAbility
+        pow: CharacterAbilityType,
+        dex: CharacterAbilityType,
+        con: CharacterAbilityType,
+        int: CharacterAbilityType,
+        wis: CharacterAbilityType,
+        cha: CharacterAbilityType
     }
-    skills?:CharacterSkill[]
+    skills?:{
+        athletics : CharacterSkill, //运动, str
+
+        acrobatics : CharacterSkill, //特技, dex
+        sleightOfHand : CharacterSkill, //巧手,
+        stealth : CharacterSkill, //隐匿,
+
+        arcana : CharacterSkill, //奥秘,int
+        history : CharacterSkill, //历史,
+        investigation : CharacterSkill, //调查,
+        nature : CharacterSkill, //自然,
+        religion : CharacterSkill, //宗教,
+
+        animalHandling : CharacterSkill, //驯兽,was
+        insight : CharacterSkill, //洞悉,
+        medicine : CharacterSkill, //医药,
+        perception : CharacterSkill, //察觉,
+        survival : CharacterSkill, //生存,
+
+        deception : CharacterSkill, //欺瞒,cha
+        intimidation : CharacterSkill, //威吓,
+        performance : CharacterSkill, //表演,
+        persuasion : CharacterSkill, //游说
+    }
 }

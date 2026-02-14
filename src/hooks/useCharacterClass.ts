@@ -24,7 +24,13 @@ export const CharacterClasses:Record<string, CharacterClassType>={
     warlock:{id:'warlock', name:'warlock', chName:'魔契师', icon:'warlock',},
     wizard:{id:'wizard', name:'wizard', chName:'法师', icon:'wizard',},
 }
-export const CharacterOptions:SelectOptionType<CharacterClassType>[]=[]
+export const CharacterOptions:SelectOptionType<CharacterClassType>[]=Object.values(CharacterClasses).map((item)=>{
+    return {
+        value:item.id,
+        label:item.chName,
+        data:item,
+    }
+})
 
 
 export default function useCharacterClass(){
