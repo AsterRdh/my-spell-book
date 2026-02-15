@@ -1,5 +1,6 @@
-import {useMemo, useState} from "react";
+import React, {useMemo, useState} from "react";
 import {Checkbox, Col, InputNumber, Row} from "antd";
+import type {InputNumberRef as RcInputNumberRef} from "@rc-component/input-number/es/InputNumber";
 
 export type CharacterAbilityType={
     score?:number
@@ -11,7 +12,7 @@ type AbilityInput ={
     onChange?: (value?:CharacterAbilityType)=>void
 }
 
-export default function AbilityInput(props:AbilityInput){
+const AbilityInput = React.forwardRef<RcInputNumberRef,AbilityInput>((props, ref) => {
 
     const {value,onChange} = props
 
@@ -51,6 +52,7 @@ export default function AbilityInput(props:AbilityInput){
                              onChangeInner({...trueValue,score:value || 0})
                          }}
                          min={0}
+                         ref={ ref}
             />
         </Col>
         <Col span={8}  style={{textAlign:'center'}}>
@@ -58,4 +60,7 @@ export default function AbilityInput(props:AbilityInput){
         </Col>
 
     </Row>
-}
+})
+
+
+export default AbilityInput;

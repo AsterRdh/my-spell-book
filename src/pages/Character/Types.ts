@@ -43,4 +43,27 @@ export type Character={
         performance : CharacterSkill, //表演,
         persuasion : CharacterSkill, //游说
     }
+
+    ac?:number
+    acPS?:string
+    hp?:number
+    hpMax?:number
+    hpTemp?:number
+    hpDice?:{
+        dice?:'d6'|'d8'|'d10'|'d12'
+        num?:number
+    }[]
+    deathSavingThrow?:{
+        size?:number
+        success?:number
+        fail?:number
+    }
+    spell?:{
+        keyAbility?:'pow'|'dex'|'con'|'int'|'wis'|'cha'
+        hit?:number
+        dc?:number
+    }
+
+    speed?:string
+
 }
