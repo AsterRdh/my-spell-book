@@ -1,6 +1,6 @@
 import React from "react";
 import type {NotificationInstance} from "antd/es/notification/interface";
-import type {BookType, SelectOptionType, SpellSchoolType} from "./types/DataType.ts";
+import type {BookType, PageSetting, SelectOptionType, SpellSchoolType} from "./types/DataType.ts";
 type AppContextType = {
     notification?:NotificationInstance,
     loading: boolean,
@@ -12,7 +12,8 @@ type AppContextType = {
     dndSpellSchool:{
         schools:Record<string, SpellSchoolType>
         schoolOptions:SelectOptionType<SpellSchoolType>[]
-    }
+    },
+    setting:PageSetting
 };
 export const AppContext = React.createContext<AppContextType>({
     notification: undefined,
@@ -25,5 +26,9 @@ export const AppContext = React.createContext<AppContextType>({
     dndSpellSchool:{
         schools:{},
         schoolOptions:[]
-    }
+    },
+    setting: {
+        pageSize:{height: 12.8, width: 10},
+        backgroundColor:'#fff'
+    },
 });

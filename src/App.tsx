@@ -54,7 +54,7 @@ function App() {
                 algorithm: isDarkMode? theme.darkAlgorithm : theme.defaultAlgorithm,
             }}
         >
-            <AppContext.Provider value={{notification, loading, setLoading,dndBook,dndSpellSchool}}>
+            <AppContext.Provider value={{notification, loading, setLoading,dndBook,dndSpellSchool,setting:{pageSize:{height:12.8,width:10},backgroundColor:'#fff'}}}>
                 <div className={'app'}>
                     <div style={{height:'100%',display:'flex',flexDirection:'column',position:'relative'}}>
                         <Menu

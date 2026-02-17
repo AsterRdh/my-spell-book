@@ -134,7 +134,7 @@ export const BardIcon: React.FC<Partial<CustomIconComponentProps>> = (props) => 
     <Icon component={bard} {...props} />
 );
 
-const ClassIcon:React.FC<Partial<CustomIconComponentProps&{clazz:string}>> =(props)=>{
+const ClassIcon:React.FC<Partial<CustomIconComponentProps&{clazz?:string|null}>> =(props)=>{
     const {clazz,...rest} = props;
 
     switch (clazz) {

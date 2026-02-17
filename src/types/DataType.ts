@@ -56,6 +56,7 @@ export type PageSetting = {
     pageSize: {
         width: number,
         height: number
-    }
+    },
+    backgroundColor: string,
 }
-export const SizeScaling=[120,125]
+export const SizeScaling=[125,125]
