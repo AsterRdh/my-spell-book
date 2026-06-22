@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {useContext, useMemo} from "react";
 import {
     AttributeLang,
     type Monster,
@@ -11,16 +11,16 @@ import {getAlignment} from "../../utils/AlignmentUtils.ts";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import ReactMarkdown from "react-markdown";
-import type {BookType} from "../../types/DataType.ts";
+import {type BookType, SizeScaling} from "../../types/DataType.ts";
 import type {ImageSelectorType} from "../../compoment/ImageSelector/ImageSelector.tsx";
 import {defaultImageSettings} from "../../compoment/ImageSelector/DefaultData.ts";
+import {AppContext} from "../../AppContext.ts";
 
 type MonsterCardProps = {
     dataSource?: Monster
     dataSet:{
         books:{[key:string]:BookType};
     }
-    size:[number, number]
 }
 
 const renderSpeed=(speed?: {type: SpeedType, value: string}[])=>{
@@ -61,7 +61,22 @@ const getModifiers=(value?:number)=>{
 
 
 const MonsterCard = React.forwardRef((props: MonsterCardProps, ref: React.Ref<HTMLDivElement>) => {
-    const {size,dataSet:{books}} = props;
+
+    const {books} = props.dataSet;
+    const {setting:{pageSize,backgroundColor}} = useContext(AppContext)
+    const cardSize:[number, number] = useMemo(() => {
+        return [SizeScaling[0]*pageSize.width, SizeScaling[1]*pageSize.height]
+    }, [pageSize]);
+
+    const bgColor = useMemo(() => {
+        console.log(backgroundColor)
+        if(typeof backgroundColor === 'string'){
+            return backgroundColor
+        }else {
+            return backgroundColor.toHexString()
+        }
+    }, [backgroundColor]);
+
     const dataSource = props.dataSource;
     const bookIcon = useMemo(() => {
         if(!dataSource || !dataSource.fromBook) return <></>
@@ -99,7 +114,7 @@ const MonsterCard = React.forwardRef((props: MonsterCardProps, ref: React.Ref<HT
     }, [dataSource]);
 
     return(
-        <div className={'bestiary-card'} ref={ref} style={{width: size[0], height: size[1],maxWidth:size[0], maxHeight:size[1]}}>
+        <div className={'bestiary-card'} ref={ref} style={{width: cardSize[0], height: cardSize[1],maxWidth:cardSize[0], maxHeight:cardSize[1],backgroundColor:bgColor}}>
             <div style={{position:'absolute', top:120, right:120,fontSize:'36px',zIndex:30}}>
                 CR {dataSource?.level}({dataSource?.xp}XP)
             </div>
@@ -234,7 +249,7 @@ const MonsterCard = React.forwardRef((props: MonsterCardProps, ref: React.Ref<HT
                 {bookIcon}
             </div>
             {
-                image.mask &&  <div style={{position:'absolute', bottom: 0, right: 0,top:0,left:0,backgroundColor:'rgba(255,255,255,0.5)',zIndex:20}}/>
+                image.mask &&  <div style={{position:'absolute', bottom: 0, right: 0,top:0,left:0,backgroundColor:bgColor,zIndex:20,opacity:0.5}}/>
             }
             <div style={{position:'absolute',
                 bottom: (image.position?.y||0) + 100,
@@ -249,7 +264,7 @@ const MonsterCard = React.forwardRef((props: MonsterCardProps, ref: React.Ref<HT
                                  height:  image.size &&  image.size.height || '50%',
                                  objectFit: image.fit ||'cover',
                                  transform: `rotate(${image.rotation||0}deg)`
-                        }}
+                            }}
                         />
                     )
                 }

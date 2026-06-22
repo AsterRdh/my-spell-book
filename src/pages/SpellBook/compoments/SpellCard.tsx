@@ -1,8 +1,8 @@
-import type {BookType, SpellSchoolType, SpellType} from "../../../types/DataType.ts";
+import {type BookType, SizeScaling, type SpellSchoolType, type SpellType} from "../../../types/DataType.ts";
 import {GiArcheryTarget, GiChest, GiClockwork, GiLips, GiSandsOfTime, GiSensuousness} from "react-icons/gi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import {useMemo,forwardRef} from "react";
+import {useMemo, forwardRef, useContext} from "react";
 import {Space} from "antd";
 import rehypeRaw from 'rehype-raw';
 import {
@@ -14,6 +14,7 @@ import {
     Necromancy,
     Transmutation
 } from "../../../icons/SchoolIcons.tsx";
+import {AppContext} from "../../../AppContext.ts";
 
 type SpellCardProps = {
     spell?:SpellType
@@ -21,12 +22,27 @@ type SpellCardProps = {
         schools:{[key:string]:SpellSchoolType}
         books:{[key:string]:BookType};
     }
-    size:[number, number]
  
 }
 
 const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
-    const {spell,dataSet:{schools,books},size} = props;
+    const {spell,dataSet:{schools,books}} = props;
+
+    const {setting:{pageSize,backgroundColor}} = useContext(AppContext)
+    const cardSize:[number, number] = useMemo(() => {
+        return [SizeScaling[0]*pageSize.width, SizeScaling[1]*pageSize.height]
+    }, [pageSize]);
+
+    const bgColor = useMemo(() => {
+        console.log(backgroundColor)
+        if(typeof backgroundColor === 'string'){
+            return backgroundColor
+        }else {
+            return backgroundColor.toHexString()
+        }
+    }, [backgroundColor]);
+
+
     const spellCardTitle = useMemo(() => {
         if (!spell || !spell.name) return ['', ''];
         return [
@@ -68,7 +84,7 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
     }, [books, spell]);
 
     return (
-        <div className={'spell-card'} ref={ref} style={{width: size[0], height: size[1],maxWidth:size[0], maxHeight:size[1]}}>
+        <div className={'spell-card'} ref={ref} style={{width: cardSize[0], height: cardSize[1],maxWidth:cardSize[0], maxHeight:cardSize[1],backgroundColor: bgColor}}>
             <div className={'spell-card-title-box'}>
                 <div className={'first-litter'}>
                     {spellCardTitle[0]}

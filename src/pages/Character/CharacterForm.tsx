@@ -1,12 +1,13 @@
-import {Button, Col, Collapse, Divider, Form, Input, InputNumber, Row, Space} from "antd";
-import type {Character} from "./Types.ts";
+import {Button, Col, Collapse, Divider, Form, Input, InputNumber, Row, Select, Space} from "antd";
+import {type Character, CharacterSensesOptions} from "./Types.ts";
 import type {FormInstance} from "antd/lib";
 import {useEffect} from "react";
-import {ProficiencyBonus} from "../../data/CharacterData.tsx";
-import {PlusOutlined} from "@ant-design/icons";
+import {DemoCharacter, ProficiencyBonus} from "../../data/CharacterData.tsx";
+import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import ClassInput from "../../compoment/ClassInput/ClassInput.tsx";
 import AbilityInput from "../../compoment/AbilityInput/AbilityInput.tsx";
 import SkillInput, {computeSkillValue2} from "../../compoment/SkillInput/SkillInput.tsx";
+import ImageSelector from "../../compoment/ImageSelector/ImageSelector.tsx";
 type CharacterFormProps = {
     form?: FormInstance<Character>
 }
@@ -33,7 +34,7 @@ export default function CharacterForm(props:CharacterFormProps){
     const proficiencyBonus = Form.useWatch('proficiencyBonus',form);
     const pow = Form.useWatch(['ability','pow'],form);
     const dex = Form.useWatch(['ability','dex'],form);
-    const con = Form.useWatch(['ability','con'],form);
+    // const con = Form.useWatch(['ability','con'],form);
     const int = Form.useWatch(['ability','int'],form);
     const wis = Form.useWatch(['ability','wis'],form);
     const cha = Form.useWatch(['ability','cha'],form);
@@ -80,8 +81,11 @@ export default function CharacterForm(props:CharacterFormProps){
     useEffect(() => {form.setFieldValue(['skills','persuasion'],  computeSkillValue2(persuasion, cha?.modifier, proficiencyBonus))}, [ cha?.modifier, proficiencyBonus, persuasion, form])
 
     return (
-        <Form<Character> form={form} labelCol={{ span: 5 }} >
+        <Form<Character> form={form} labelCol={{ span: 5 }} initialValues={ DemoCharacter}>
             <Form.Item label="角色姓名" name={'name'} >
+                <Input/>
+            </Form.Item>
+            <Form.Item label="角色姓名" name={'name2'} >
                 <Input/>
             </Form.Item>
             <Form.Item label="玩家名" name={'playerName'}>
@@ -90,9 +94,161 @@ export default function CharacterForm(props:CharacterFormProps){
             <Form.Item label="种族" name={'races'} >
                 <Input/>
             </Form.Item>
+            <Form.Item label="其他描述" name={'others'} >
+                <Input.TextArea/>
+            </Form.Item>
+            <Collapse  ghost size={'small'}  items={[
+                {
+                    key: 'image',
+                    label: '插入图片',
+                    forceRender: true,
+                    children: (
+                        <Form.Item name={'image'} noStyle>
+                            <ImageSelector name={['image']} />
+                        </Form.Item>
+                    )
+                }
+                ]}/>
+
+            <Divider />
+            <Form.List name={['senses']}>
+                {(fields, {add, remove})=>{
+                    return <Row>
+                        <Col span={5} style={{textAlign:'right'}}>
+                            感官：
+                        </Col>
+                        <Col span={19}>
+                            <Row align={"middle"} gutter={[8,8]}>
+                                {fields.map((field, index)=>(
+                                    <>
+                                        <Col span={5} key={"hpRoll-dice"+field.key+index}>
+                                            <Form.Item {...field} noStyle name={[field.name, 'type']}>
+                                                <Select options={CharacterSensesOptions} style={{width:'100%'}}/>
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={16} key={"hpRoll-num"+field.key+index}>
+                                            <Form.Item {...field} noStyle name={[field.name, 'range']}>
+                                                <Input />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={2} key={"hpRoll-opt"+field.key+index}>
+                                            <MinusCircleOutlined onClick={()=>remove(index)}/>
+                                        </Col>
+                                    </>
+                                ))}
+                                <Col span={24} key={"hpRoll-add"}>
+                                    <Form.Item >
+                                        <Button type="dashed" onClick={()=>add()} block>
+                                            <PlusOutlined />
+                                        </Button>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+
+                        </Col>
+
+                    </Row>
+                }}
+            </Form.List>
             <Form.Item label={"熟练加值"} name={'proficiencyBonus'} dependencies={['classes']}>
                 <InputNumber min={0} style={{width:'100%'}} />
             </Form.Item>
+            <Form.Item label={"护甲值"} name={['ac']}>
+                <InputNumber min={0} style={{width:'100%'}} />
+            </Form.Item>
+            <Form.Item label={"护甲值备注"} name={['acPS']}>
+                <Input />
+            </Form.Item>
+            <Form.Item label={"速度"} name={'speed'}>
+                <Input.TextArea />
+            </Form.Item>
+            <Form.Item label={"先攻加值"} name={'initiative'}>
+                <InputNumber min={0} style={{width:'100%'}}/>
+            </Form.Item>
+            <Form.Item label={"武艺骰"} name={["monk",'martialArtsDie']}>
+                <Select options={ [
+                    {value:'d6',label:'d6'},
+                    {value:'d8',label:'d8'},
+                    {value:'d10',label:'d10'},
+                    {value:'d12',label:'d12'},
+                ]} style={{width:'100%'}}/>
+            </Form.Item>
+            <Form.Item label={"功力点"} name={["monk",'qi']}>
+                <InputNumber min={0} max={20} style={{width:'100%'}}/>
+            </Form.Item>
+
+            <Divider />
+            <Form.Item label={"生命值"} name={['hp']}>
+                <InputNumber min={0} style={{width:'100%'}}/>
+            </Form.Item>
+            <Form.Item label={"最大生命值"} name={['hpMax']}>
+                <InputNumber min={0} style={{width:'100%'}}/>
+            </Form.Item>
+            <Form.Item label={"临时生命值"} name={['hpTemp']}>
+                <InputNumber min={0} style={{width:'100%'}}/>
+            </Form.Item>
+            <Form.List name={['hpDice']}>
+                {(fields, {add, remove})=>{
+                    return <Row>
+                        <Col span={5} style={{textAlign:'right'}}>
+                            生命骰：
+                        </Col>
+                        <Col span={19}>
+                            <Row align={"middle"} gutter={[8,8]}>
+                                {fields.map((field, index)=>(
+                                    <>
+                                        <Col span={5} key={"hpRoll-dice"+field.key+index}>
+                                            <Form.Item {...field} noStyle name={[field.name, 'dice']}>
+                                                <Select options={ [
+                                                    {value:'d6',label:'d6'},
+                                                    {value:'d8',label:'d8'},
+                                                    {value:'d10',label:'d10'},
+                                                    {value:'d12',label:'d12'},
+                                                ]} style={{width:'100%'}}/>
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={16} key={"hpRoll-num"+field.key+index}>
+                                            <Form.Item {...field} noStyle name={[field.name, 'num']}>
+                                                <InputNumber min={0} style={{width:'100%'}}/>
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={2} key={"hpRoll-opt"+field.key+index}>
+                                            <MinusCircleOutlined onClick={()=>remove(index)}/>
+                                        </Col>
+                                    </>
+                                ))}
+                                <Col span={24} key={"hpRoll-add"}>
+                                    <Form.Item >
+                                        <Button type="dashed" onClick={()=>add()} block>
+                                            <PlusOutlined />
+                                        </Button>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+
+                        </Col>
+
+                    </Row>
+                }}
+            </Form.List>
+            <Divider />
+            <Form.Item label={"施法关键属性"} name={['spell','keyAbility']}>
+                <Select options={[
+                    {value:'str',label:'力量'},
+                    {value:'dex',label:'敏捷'},
+                    {value:'con',label:'体质'},
+                    {value:'int',label:'智力'},
+                    {value:'wis',label:'感知'},
+                    {value:'cha',label:'魅力'}
+                ]} mode={'multiple'}/>
+            </Form.Item>
+            <Form.Item label={"法术攻击加值"} name={['spell','hit']}>
+                <InputNumber min={0} style={{width:'100%'}}/>
+            </Form.Item>
+            <Form.Item label={"法术DC"} name={['spell','dc']}>
+                <InputNumber min={0} style={{width:'100%'}}/>
+            </Form.Item>
+
             <Form.List name={'classes'}>
                 {(fields, {add, remove})=>{
                     return <>
@@ -104,7 +260,7 @@ export default function CharacterForm(props:CharacterFormProps){
                         </Divider>
                         {
                             fields.map((field,index)=>{
-                                return <Form.Item {...field} key={'class'+field.key}  >
+                                return <Form.Item {...field} key={'class'+field.key+index}  >
                                     <ClassInput remove={remove} index={index}/>
                                 </Form.Item>
                             })
@@ -117,10 +273,11 @@ export default function CharacterForm(props:CharacterFormProps){
                 详细属性
             </Divider>
 
-            <Collapse ghost size={'small'}  items={[
+            <Collapse  ghost size={'small'}  items={[
                 {
                     key: 'ability',
                     label: '属性',
+                    forceRender:true,
                     children:   <Space vertical={ true} style={{width:'100%'}}>
                         <Row wrap={ false}>
                             <Col span={5}>
@@ -137,7 +294,7 @@ export default function CharacterForm(props:CharacterFormProps){
                                 </Row>
                             </Col>
                         </Row>
-                        <Form.Item name={['ability','pow']} label={"力量"} >
+                        <Form.Item name={['ability','str']} label={"力量"} >
                             <AbilityInput />
                         </Form.Item>
                         <Form.Item name={['ability','dex']} label={"敏捷"} >
@@ -156,14 +313,16 @@ export default function CharacterForm(props:CharacterFormProps){
                             <AbilityInput/>
                         </Form.Item>
                     </Space>
-                },{
+                },
+                {
                     key: 'skill',
                     label: '技能',
+                    forceRender:true,
                     children: <div>
                         <Collapse ghost collapsible="icon" items={[
                             {
                                 label: <a onClick={()=>{form.scrollToField(['ability','pow'],{behavior:'smooth',focus:true})}} >力量</a>,
-                                key: 'pow',
+                                key: 'pow',forceRender:true,
                                 children: <div>
                                     <Row wrap={ false}>
                                         <Col span={5}></Col>
@@ -182,7 +341,7 @@ export default function CharacterForm(props:CharacterFormProps){
                             },
                             {
                                 label: <a onClick={()=>{form.scrollToField(['ability','dex'],{behavior:'smooth',focus:true})}} >敏捷</a>,
-                                key: 'dex',
+                                key: 'dex',forceRender:true,
                                 children: <div>
                                     <Row wrap={ false}>
                                         <Col span={5}></Col>
@@ -207,7 +366,7 @@ export default function CharacterForm(props:CharacterFormProps){
                             },
                             {
                                 label: <a onClick={()=>{form.scrollToField(['ability','int'],{behavior:'smooth',focus:true})}} >智力</a>,
-                                key: 'int',
+                                key: 'int',forceRender:true,
                                 children: <div>
                                     <Row wrap={ false}>
                                         <Col span={5}></Col>
@@ -238,7 +397,7 @@ export default function CharacterForm(props:CharacterFormProps){
                             },
                             {
                                 label: <a onClick={()=>{form.scrollToField(['ability','wis'],{behavior:'smooth',focus:true})}} >感知</a>,
-                                key: 'wis',
+                                key: 'wis',forceRender:true,
                                 children: <div>
                                     <Row wrap={ false}>
                                         <Col span={5}></Col>
@@ -269,7 +428,7 @@ export default function CharacterForm(props:CharacterFormProps){
                             },
                             {
                                 label: <a onClick={()=>{form.scrollToField(['ability','cha'],{behavior:'smooth',focus:true})}} >魅力</a>,
-                                key: 'cha',
+                                key: 'cha',forceRender:true,
                                 children: <div>
                                     <Row wrap={ false}>
                                         <Col span={5}></Col>
@@ -297,7 +456,244 @@ export default function CharacterForm(props:CharacterFormProps){
                             }
                         ]} size={"small"} />
                     </div>
-                }
+                },
+                {
+                    key: 'proficiencies',
+                    label: '熟练',
+                    forceRender: true,
+                    children: <div>
+                        <Form.List name={['proficiencies','armor']}>
+                            {(fields, { add, remove }) => (
+                                <Row gutter={[8,8]} align={'middle'}>
+
+                                    {
+                                        fields.map((field, index) => (
+                                            <>
+                                                {index==0 && <Col span={5} style={{textAlign:'right'}}>护甲:</Col>}
+                                                <Col span={17} offset={index==0?0:5}>
+                                                    <Form.Item
+                                                        {...field}
+                                                        key={"armor"+field.key+index}
+                                                        noStyle
+                                                    >
+                                                        <Input placeholder="请输入护甲" />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col span={2}>
+                                                    <MinusCircleOutlined onClick={() => {
+                                                        remove(field.name);
+                                                    }} />
+                                                </Col>
+                                            </>
+                                        ))
+                                    }
+                                    <Col span={17} offset={5}>
+                                        <Form.Item >
+                                            <Button type="dashed" onClick={() => {
+                                                add();
+                                            }} block icon={<PlusOutlined />}>
+                                                添加护甲
+                                            </Button>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+
+                            )}
+                        </Form.List>
+                        <Form.List name={['proficiencies','weapons']}>
+                            {(fields, { add, remove }) => (
+                                <Row gutter={[8,8]} align={'middle'}>
+
+                                    {
+                                        fields.map((field, index) => (
+                                            <>
+                                                {index==0 && <Col span={5} style={{textAlign:'right'}}>武器:</Col>}
+                                                <Col span={17} offset={index==0?0:5}>
+                                                    <Form.Item
+                                                        {...field}
+                                                        key={"weapons"+field.key+index}
+                                                        noStyle
+                                                    >
+                                                        <Input placeholder="请输入武器" />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col span={2}>
+                                                    <MinusCircleOutlined onClick={() => {
+                                                        remove(field.name);
+                                                    }} />
+                                                </Col>
+                                            </>
+                                        ))
+                                    }
+                                    <Col span={17} offset={5}>
+                                        <Form.Item >
+                                            <Button type="dashed" onClick={() => {
+                                                add();
+                                            }} block icon={<PlusOutlined />}>
+                                                添加武器
+                                            </Button>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+
+                            )}
+                        </Form.List>
+                        <Form.List name={['proficiencies','tools']}>
+                            {(fields, { add, remove }) => (
+                                <Row gutter={[8,8]} align={'middle'}>
+
+                                    {
+                                        fields.map((field, index) => (
+                                            <>
+                                                {index==0 && <Col span={5} style={{textAlign:'right'}}>工具:</Col>}
+                                                <Col span={17} offset={index==0?0:5}>
+                                                    <Form.Item
+                                                        {...field}
+                                                        key={"tools"+field.key+index}
+                                                        noStyle
+                                                    >
+                                                        <Input placeholder="请输入工具" />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col span={2}>
+                                                    <MinusCircleOutlined onClick={() => {
+                                                        remove(field.name);
+                                                    }} />
+                                                </Col>
+                                            </>
+                                        ))
+                                    }
+                                    <Col span={17} offset={5}>
+                                        <Form.Item >
+                                            <Button type="dashed" onClick={() => {
+                                                add();
+                                            }} block icon={<PlusOutlined />}>
+                                                添加工具
+                                            </Button>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+
+                            )}
+                        </Form.List>
+                        <Form.List name={['proficiencies','languages']}>
+                            {(fields, { add, remove }) => (
+                                <Row gutter={[8,8]} align={'middle'}>
+
+                                    {
+                                        fields.map((field, index) => (
+                                            <>
+                                                {index==0 && <Col span={5} style={{textAlign:'right'}}>语言:</Col>}
+                                                <Col span={17} offset={index==0?0:5}>
+                                                    <Form.Item
+                                                        {...field}
+                                                        key={"languages"+field.key+index}
+                                                        noStyle
+                                                    >
+                                                        <Input placeholder="请输入语言" />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col span={2}>
+                                                    <MinusCircleOutlined onClick={() => {
+                                                        remove(field.name);
+                                                    }} />
+                                                </Col>
+                                            </>
+                                        ))
+                                    }
+                                    <Col span={17} offset={5}>
+                                        <Form.Item >
+                                            <Button type="dashed" onClick={() => {
+                                                add();
+                                            }} block icon={<PlusOutlined />}>
+                                                添加语言
+                                            </Button>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+
+                            )}
+                        </Form.List>
+                        <Form.List name={['proficiencies','others']}>
+                            {(fields, { add, remove }) => (
+                                <Row gutter={[8,8]} align={'middle'}>
+
+                                    {
+                                        fields.map((field, index) => (
+                                            <>
+                                                {index==0 && <Col span={5} style={{textAlign:'right'}}>其他:</Col>}
+                                                <Col span={17} offset={index==0?0:5}>
+                                                    <Form.Item
+                                                        {...field}
+                                                        key={"languages"+field.key+index}
+                                                        noStyle
+                                                    >
+                                                        <Input placeholder="请其他熟练内容" />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col span={2}>
+                                                    <MinusCircleOutlined onClick={() => {
+                                                        remove(field.name);
+                                                    }} />
+                                                </Col>
+                                            </>
+                                        ))
+                                    }
+                                    <Col span={17} offset={5}>
+                                        <Form.Item >
+                                            <Button type="dashed" onClick={() => {
+                                                add();
+                                            }} block icon={<PlusOutlined />}>
+                                                添加其他熟练
+                                            </Button>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+
+                            )}
+                        </Form.List>
+                    </div>
+                },
+                {
+                    key: 'equipment ',
+                    label: '装备',
+                    forceRender: true,
+                    children: <div>
+                        <Collapse ghost size={"small"}
+                                  items={[
+                                      {
+                                          key: 'coins',
+                                          label: '钱包',
+                                          forceRender: true,
+                                          children: <div>
+                                              <Form.Item name={['equipments','coins','copper']} label={'铜币'}>
+                                                  <InputNumber min={0} style={{width:'100%'}} />
+                                              </Form.Item>
+                                              <Form.Item name={['equipments','coins','silver']} label={'银币'}>
+                                                  <InputNumber min={0} style={{width:'100%'}}  />
+                                              </Form.Item>
+                                              <Form.Item name={['equipments','coins','electrum']} label={'金银币'}>
+                                                  <InputNumber min={0} style={{width:'100%'}} />
+                                              </Form.Item>
+                                              <Form.Item name={['equipments','coins','gold']} label={'金币'}>
+                                                  <InputNumber min={0} style={{width:'100%'}} />
+                                              </Form.Item>
+                                              <Form.Item name={['equipments','coins','platinum']} label={'白金币'}>
+                                                  <InputNumber min={0} style={{width:'100%'}} />
+                                              </Form.Item>
+                                          </div>
+                                      },
+                                  ]}/>
+                        <Form.Item name={['equipments','items']} label={'其他物品'}>
+                            <Input.TextArea rows={5} />
+                        </Form.Item>
+                    </div>
+                },
             ]}/>
         </Form>
     )

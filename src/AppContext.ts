@@ -14,7 +14,13 @@ type AppContextType = {
         schoolOptions:SelectOptionType<SpellSchoolType>[]
     },
     setting:PageSetting
+    setSetting: (newSetting:PageSetting)=>void
 };
+export const defPageSetting:PageSetting = {
+    pageSize:{height: 12.8, width: 10},
+    backgroundColor:'#fff',
+    titleTextSize: 400
+}
 export const AppContext = React.createContext<AppContextType>({
     notification: undefined,
     loading: false,
@@ -27,8 +33,6 @@ export const AppContext = React.createContext<AppContextType>({
         schools:{},
         schoolOptions:[]
     },
-    setting: {
-        pageSize:{height: 12.8, width: 10},
-        backgroundColor:'#fff'
-    },
+    setting: defPageSetting,
+    setSetting: ()=>{}
 });

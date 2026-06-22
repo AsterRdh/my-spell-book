@@ -1,22 +1,22 @@
 import {Button, Col, InputNumber, Row, Tooltip} from "antd";
 import {useMemo, useState} from "react";
-import {FaCircleHalfStroke} from "react-icons/fa6";
-import {FaCircle, FaRegCircle, FaRegDotCircle} from "react-icons/fa";
+import {PiCircleBold, PiCircleFill, PiCircleHalfTiltFill} from "react-icons/pi";
+import {IoIosRadioButtonOn} from "react-icons/io";
 
-export type CharacterSkill={
+export type CharacterSkillType={
     value: number
-    otherValue: number
+    otherValue: number|string
     proficiency?: false| 'JAT' |'proficiency'|'expertise'
 }
 
 type SkillInput={
     baseValue?: number
     proficiencyBonus?: number
-    value?:CharacterSkill
-    onChange?: (value?:CharacterSkill)=>void
+    value?:CharacterSkillType
+    onChange?: (value?:CharacterSkillType)=>void
 }
 
-export const computeSkillValue=(value?:CharacterSkill, baseValue?:number, proficiencyBonus?: number)=>{
+export const computeSkillValue=(value?:CharacterSkillType, baseValue?:number, proficiencyBonus?: number)=>{
     if (value){
         value.value = 0
         if (baseValue!==undefined){
@@ -39,25 +39,23 @@ export const computeSkillValue=(value?:CharacterSkill, baseValue?:number, profic
             }
             value.value += addValue
         }
-        if (value.otherValue!==undefined){
-            value.value += value.otherValue
-        }
-        return {...value} as CharacterSkill
+
+        return {...value} as CharacterSkillType
     }
     return value
 }
-export const computeSkillValue2=(value?:CharacterSkill, baseValue?:number, proficiencyBonus?: number)=>{
+export const computeSkillValue2=(value?:CharacterSkillType, baseValue?:number, proficiencyBonus?: number)=>{
     if (baseValue===undefined && proficiencyBonus===undefined) return value
-    const value2 = value || {} as CharacterSkill
+    const value2 = value || {} as CharacterSkillType
     return computeSkillValue(value2, baseValue, proficiencyBonus)
 }
 
 export default function SkillInput(props:SkillInput){
     const {value,onChange,baseValue,proficiencyBonus} = props
 
-    const [classData, setClassData] = useState<CharacterSkill>()
+    const [classData, setClassData] = useState<CharacterSkillType>()
 
-    const onChangeInner = (value?:CharacterSkill) => {
+    const onChangeInner = (value?:CharacterSkillType) => {
         value = computeSkillValue(value, baseValue, proficiencyBonus)
         console.log('value', value)
         if (onChange){
@@ -68,28 +66,30 @@ export default function SkillInput(props:SkillInput){
     }
     const trueValue = useMemo(() => {
         if (onChange) {
-            return value || {} as CharacterSkill
+            return value || {} as CharacterSkillType
         } else {
-            return classData || {} as CharacterSkill
+            return classData || {} as CharacterSkillType
         }
     }, [classData, onChange, value]);
 
     const [proficiencyIcon ,proficiencyText] = useMemo(() => {
-        switch (trueValue?.proficiency){
-            case 'proficiency':
-                return [<FaCircle />,'熟练']
-            case 'expertise':
-                return [<FaRegDotCircle />,'专精']
-            case 'JAT':
-                return [<FaCircleHalfStroke />,'1/2熟练']
-            default:
-                return [<FaRegCircle />,'不熟练']
+
+        let skillProficiencyIcon = <PiCircleBold />
+        let tooltipText = '不熟练'
+        if (trueValue?.proficiency){
+            switch ( trueValue.proficiency){
+                case 'proficiency':skillProficiencyIcon = <IoIosRadioButtonOn /> ;tooltipText='熟练';break;
+                case 'expertise': skillProficiencyIcon = <PiCircleFill />;tooltipText='专精';break;
+                case 'JAT': skillProficiencyIcon = <PiCircleHalfTiltFill />;tooltipText='1/2熟练';break;
+            }
         }
+
+        return [skillProficiencyIcon,tooltipText]
     }, [trueValue.proficiency]);
 
     const switchProficiency = ()=>{
         if (!trueValue || !trueValue.proficiency) {
-            onChangeInner({proficiency: 'proficiency'} as CharacterSkill)
+            onChangeInner({proficiency: 'proficiency'} as CharacterSkillType)
         }else {
             let newValue:false| 'JAT' |'proficiency'|'expertise';
             switch (trueValue.proficiency) {

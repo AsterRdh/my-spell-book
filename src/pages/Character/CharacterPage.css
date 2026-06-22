@@ -24,11 +24,13 @@
     padding: 210px 260px 210px 118px;
     overflow: hidden;
     position: relative;
+    color: black;
 }
 .character-card-base-page{
     display: flex;
     align-items: baseline;
     z-index: 10;
+    position: relative;
 }
 .character-card-page-header-icon-box{
     text-align: center;
@@ -56,11 +58,23 @@
 .character-card--base-page-left{
     flex: 1;
     margin-left: 3rem;
+
 }
 .character-card-page-header-name{
-    font-size: 8rem;
+    font-size: 12rem;
+    font-family: "Nodesto Caps Condensed", serif;
+}
+.character-card-page-header-name2{
+    font-size: 5rem;
     font-family: '方正吕建德行楷', serif;
-
+    line-height: 3rem;
+    text-align: end;
+}
+.character-card-page-header-name-box{
+    top:-130px;
+    height: 200px;
+    position: relative;
+    align-items: end;
 }
 .character-card-page-header-ability-box{
     font-size: 15rem;
@@ -75,10 +89,11 @@
 
 .character-card-page-header-ability-box-item-value{
     position: absolute;
-    top: 15px;
-    left: 15px;
-    width: calc(100% - 30px);
-    height: calc(100% - 30px);
+    top: 20px;
+    height: 175px;
+    left: 20px;
+    width: 175px;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -153,15 +168,137 @@
     }
 }
 .character-card-page-skill-box{
-    table{
-        border: black solid 2px;
-        border-collapse: collapse;
-        width: 50%;
+    display: flex;
+    margin-top: 30px;
+    .skill-box-col{
+        flex: 1;
+        margin: 0 10px;
+        .skill-table{
+            margin-top: 20px;
+            border-width: 0 0 1px 0;
+            border-color: black;
+            border-style: solid;
+            .skill-table-title{
+                border-width: 1px 1px 0 1px !important;
+                border-color: black;
+                border-style: solid;
+                padding-left: 5px;
+
+            }
+            .skill-table-row{
+                display: flex;
+                border-width: 1px 0 0 1px;
+                border-color: black;
+                border-style: solid;
+            }
+
+            .skill-table-cell{
+                padding: 3px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 52px;
+                border-width: 0 1px 0 0;
+                border-color: black;
+                border-style: solid;
+            }
+            .radio-cell{
+                width: 52px;
+            }
+            .name-cell{
+                padding: 3px 50px;
+            }
+            .value-cell{
+                flex: 0.5
+            }
+            .other-value-cell{
+                flex: 1
+            }
+        }
     }
-    td{
-        border: black solid 2px;
+}
+
+.character-card-page-title{
+    font-family: "Nodesto Caps Condensed","方正吕建德行楷", serif;
+    font-size: 160px;
+
+}
+.character-card-page-left.proficiencies{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.character-card-proficiencies{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.character-card-proficiencies-card{
+    border: black solid 8px;
+    padding: 16px;
+    width: 100%;
+    border-radius: 48px;
+    display: flex;
+    min-height: 200px;
+    margin-bottom: 20px;
+
+    .card-title{
+        font-family: "Nodesto Caps Condensed","方正吕建德行楷", serif;
+        font-size: 64px;
     }
-    tr{
-        border: black solid 2px;
+    .card-icon{
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
+    .card-content{
+        flex: 1;
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        margin-left: 20px;
+    }
+    .card-content-text{
+        flex: auto;
+        height: 0;
+        font-size: 2.2rem;
+    }
+}
+
+.character-card-equipment-wallet{
+    border: black solid 4px;
+    border-radius: 64px;
+    display: flex;
+    .wallet-title{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 32px;
+    }
+    .wallet-content{
+        flex: 1;
+        display: flex;
+    }
+    .wallet-content-item{
+        flex: 1;
+        border-left: black solid 4px;
+    }
+    .wallet-content-item-title{
+        border-bottom: black solid 4px;
+        text-align: center;
+        font-size: 32px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+    }
+    .wallet-content-item-value{
+        text-align: center;
+    }
+}
+.character-card-equipment-items{
+    margin-top: 16px;
 }

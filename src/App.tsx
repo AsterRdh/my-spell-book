@@ -7,11 +7,12 @@ import {MdFeaturedPlayList} from "react-icons/md";
 import {FaDragon, FaGithub} from "react-icons/fa";
 
 import useNotification from "antd/es/notification/useNotification";
-import { AppContext } from "./AppContext.ts";
+import {AppContext, defPageSetting} from "./AppContext.ts";
 import {useDNDBook} from "./hooks/useDNDBook.tsx";
 import {useDNDSpellSchool} from "./hooks/useDNDSpellSchool.tsx";
 import LoadingPage from "./pages/Loading/LoadingPage.tsx";
 import { RiLayout2Line } from "react-icons/ri";
+import type {PageSetting} from "./types/DataType.ts";
 
 const SpellBook = lazy(() => import('./pages/SpellBook/SpellBook'));
 const FeaturePage = lazy(() => import('./pages/Feature/FeaturePage'));
@@ -48,13 +49,15 @@ function App() {
         }
     };
 
+    const [pageSettings, setPageSettings] = useState<PageSetting>(defPageSetting)
+
     return (
         <ConfigProvider
             theme={{
                 algorithm: isDarkMode? theme.darkAlgorithm : theme.defaultAlgorithm,
             }}
         >
-            <AppContext.Provider value={{notification, loading, setLoading,dndBook,dndSpellSchool,setting:{pageSize:{height:12.8,width:10},backgroundColor:'#fff'}}}>
+            <AppContext.Provider value={{notification, loading, setLoading,dndBook,dndSpellSchool,setting:pageSettings,setSetting:setPageSettings}}>
                 <div className={'app'}>
                     <div style={{height:'100%',display:'flex',flexDirection:'column',position:'relative'}}>
                         <Menu
@@ -100,9 +103,6 @@ function App() {
                                         href={'https://github.com/AsterRdh/my-spell-book'} target={'_blank'}
                                 />
                             </Tooltip>
-
-
-
                         </div>
                     </div>
                     <Suspense fallback={<LoadingPage/>}>

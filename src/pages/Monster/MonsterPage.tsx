@@ -1,7 +1,7 @@
-import React, {useContext, useState} from "react";
+import React, {useContext} from "react";
 import {
     Button,
-    Col,
+    Col, ColorPicker,
     Divider,
     Form,
     Input,
@@ -13,7 +13,7 @@ import {
 import BasePage from "../BasePage.tsx";
 import MonsterCard from "./MonsterCard.tsx";
 import {useForm} from "antd/es/form/Form";
-import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
+import {type PageSetting} from "../../types/DataType.ts";
 import {MinusCircleOutlined} from '@ant-design/icons';
 import {
     type AbilityType,
@@ -65,8 +65,7 @@ const getDataWithPS=(data?:string)=>{
 }
 
 const MonsterPage=()=>{
-    const {setLoading,dndBook} = useContext(AppContext)
-    const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
+    const {setLoading,dndBook,setting,setSetting} = useContext(AppContext)
     const {books,bookOptions} = dndBook;
 
     const [form] = useForm<Monster>()
@@ -259,7 +258,7 @@ const MonsterPage=()=>{
                         }
                         case '挑战等级':{
                             const strings = rowInfo.join("").replaceAll("（",'(').split("(");
-                            data.level = parseInt(strings[0]);
+                            data.level = strings[0];
                             data.xp = parseInt(strings[1].substring(0,strings[1].length-3).replaceAll(",",''));
                             break
                         }
@@ -327,7 +326,6 @@ const MonsterPage=()=>{
                preViewRender={(ref) => {
                    return <MonsterCard ref={ref}
                                        dataSource={monsterValues}
-                                       size={[SizeScaling[0]*pageSize[0], SizeScaling[1]*pageSize[1]]}
                                        dataSet={{
                                            books: books
                                        }}
@@ -355,18 +353,15 @@ const MonsterPage=()=>{
                preViewBottomRender={()=>{
                    return <Space>
                        <div style={{marginLeft: '1rem'}}>
-                           {pageSize[0]}×{pageSize[1]}(cm)
+                           {setting.pageSize.width}×{setting.pageSize.height}(cm)
                        </div>
                    </Space>
                }}
                settingRender={() => {
                    return<Form<MonsterPageSetting>
                            form={settingForm}
-                           initialValues={{pageSize: {width: 10, height: 12.8}}}
-                           onFinish={setting=>{
-                               const {width, height} = setting.pageSize;
-                               setPageSize([width, height])
-                           }}
+                           initialValues={setting}
+                           onFinish={setting=>{setSetting( setting)}}
                        >
                            <Form.Item label="页面大小" >
                                <Space>
@@ -378,6 +373,9 @@ const MonsterPage=()=>{
                                    </Form.Item>
                                </Space>
                            </Form.Item>
+                           <Form.Item label="页面背景" name={['backgroundColor']}>
+                               <ColorPicker />
+                           </Form.Item>
                        </Form>;
                }}
                onSettingSave={()=>{
@@ -386,9 +384,7 @@ const MonsterPage=()=>{
                }}
                afterSettingModalOpenChange={(open) => {
                    if (!open) {
-                       settingForm.setFieldsValue({
-                           pageSize: {width: pageSize[0], height: pageSize[1]}
-                       })
+                       settingForm.setFieldsValue(setting)
                    }
                }}
                buttonRender={function (): React.ReactNode | React.ReactNode[] {return []}}
@@ -422,7 +418,7 @@ const MonsterPage=()=>{
                    <Row gutter={16}>
                        <Col>
                            <Form.Item name="level" label={"挑战等级"}>
-                               <InputNumber precision={0}/>
+                               <Input />
                            </Form.Item>
                        </Col>
                        <Col flex={"auto"}>
