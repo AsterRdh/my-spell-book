@@ -13,12 +13,14 @@ import {useDNDSpellSchool} from "./hooks/useDNDSpellSchool.tsx";
 import LoadingPage from "./pages/Loading/LoadingPage.tsx";
 import { RiLayout2Line } from "react-icons/ri";
 import type {PageSetting} from "./types/DataType.ts";
+import {FaShop} from "react-icons/fa6";
 
 const SpellBook = lazy(() => import('./pages/SpellBook/SpellBook'));
 const FeaturePage = lazy(() => import('./pages/Feature/FeaturePage'));
 const MonsterPage = lazy(() => import('./pages/Monster/MonsterPage'));
 const CharacterPage = lazy(() => import('./pages/Character/CharacterPage'));
 const LayoutPage = lazy(() => import('./pages/TokenLayout/LayoutPage'));
+const ShopPage = lazy(() => import('./pages/Shop/ShopPage'));
 
 
 
@@ -44,6 +46,8 @@ function App() {
                 return <CharacterPage/>;
             case 'Layout':
                 return <LayoutPage/>;
+            case 'Shop':
+                return <ShopPage/>
             default:
                     return 404;
         }
@@ -89,6 +93,11 @@ function App() {
                                     key: 'Layout',
                                     label: 'token排版',
                                     icon:<RiLayout2Line />
+                                },
+                                {
+                                    key: 'Shop',
+                                    label: '商店',
+                                    icon:<FaShop />
                                 }
                             ]}
                             onClick={(item)=> {
