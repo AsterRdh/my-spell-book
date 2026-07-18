@@ -1,23 +1,45 @@
-import React, {useMemo} from "react";
-import type {BookType} from "../../types/DataType.ts";
+import React, {useContext, useMemo} from "react";
+import {type BookType, RarityTypeOptions, SizeScaling} from "../../types/DataType.ts";
 import type {Feature} from "./Types.ts";
 import './FeatureCard.css'
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import {defaultImageSettings} from "../../compoment/ImageSelector/DefaultData.ts";
+import {Space} from "antd";
+import {AppContext} from "../../AppContext.ts";
+
 
 type FeatureCardProps = {
     dataSource?: Feature
-    dataSet:{
-        books:{[key:string]:BookType};
-    }
-    size:[number, number]
+    dataSet:{ books:{[key:string]:BookType}; }
 };
 
 const FeatureCard =React.forwardRef((props: FeatureCardProps, ref: React.Ref<HTMLDivElement>) => {
-    const {dataSource,size,dataSet:{books}} = props;
+    const {dataSource,dataSet:{books}} = props;
+    const {setting:{pageSize,backgroundColor,titleTextSize,baseTextSize}} = useContext(AppContext)
+    const cardSize:[number, number] = useMemo(() => {
+        return [SizeScaling[0]*pageSize.width, SizeScaling[1]*pageSize.height]
+    }, [pageSize]);
 
+    const cardPadding:[number, number, number, number] = useMemo(() => {
+        return [
+            SizeScaling[1]*pageSize.padding.top,
+            SizeScaling[0]*pageSize.padding.right,
+            SizeScaling[1]*pageSize.padding.bottom,
+            SizeScaling[0]*pageSize.padding.left,
+
+        ]
+    }, [pageSize.padding]);
+
+    const bgColor = useMemo(() => {
+        console.log(backgroundColor)
+        if(typeof backgroundColor === 'string'){
+            return backgroundColor
+        }else {
+            return backgroundColor.toHexString()
+        }
+    }, [backgroundColor]);
     const featureCardTitle = useMemo(() => {
         if (!dataSource || !dataSource.name) return ['', ''];
         return [
@@ -25,6 +47,16 @@ const FeatureCard =React.forwardRef((props: FeatureCardProps, ref: React.Ref<HTM
             dataSource.name.slice(1)
         ]
     }, [dataSource]);
+    const titleSize = useMemo(() => {
+        const base: number = (titleTextSize/400);
+        return {
+            firstLitter: Math.floor(base*400),
+            title: Math.floor( 126*base),
+            top:Math.ceil(base*(-190)+200)
+
+        }
+    }, [titleTextSize]);
+
 
     const bookIcon = useMemo(() => {
         if(!dataSource || !dataSource.fromBook) return <></>
@@ -40,6 +72,8 @@ const FeatureCard =React.forwardRef((props: FeatureCardProps, ref: React.Ref<HTM
                     return '能力'
                 case 'Feats':
                     return '专长'
+                case "Item":
+                    return '物品'
             }
         }
         return ''
@@ -76,20 +110,29 @@ const FeatureCard =React.forwardRef((props: FeatureCardProps, ref: React.Ref<HTM
 
 
     return (
-        <div className={'feature-card'} ref={ref} style={{width: size[0], height: size[1],maxWidth:size[0], maxHeight:size[1]}}>
-            <div style={{position:'absolute', top:120, right:120,fontSize:'36px',zIndex:30}}>
+        <div className={'feature-card'} ref={ref} style={{
+            width: cardSize[0], height: cardSize[1],
+            maxWidth:cardSize[0], maxHeight:cardSize[1],
+            minWidth:cardSize[0],minHeight:cardSize[1],overflow:"hidden",
+            backgroundColor:bgColor,
+            paddingTop:cardPadding[0],
+            paddingRight:cardPadding[1],
+            paddingBottom:cardPadding[2],
+            paddingLeft:cardPadding[3],
+        }}>
+            <div style={{position:'absolute', top:120, right:120,fontSize:baseTextSize*0.85,zIndex:30}}>
                 {FeatureImage}
             </div>
             <div style={{position:'relative',zIndex:500}}>
             <div className={'feature-card-title-box'}>
-                <div className={'first-litter'}>
+                <div className={'first-litter'} style={{fontSize: titleSize.firstLitter}}>
                     {featureCardTitle[0]}
                 </div>
-                <div style={{flex: 1, paddingTop: '4px'}}>
-                    <div className={'name'}>
+                <div style={{flex: 1, paddingTop: titleSize.top}}>
+                    <div className={'name'} style={{fontSize: titleTextSize*0.315}}>
                         {featureCardTitle[1]}
                     </div>
-                    <div className={'cn-name'}>
+                    <div className={'cn-name'} style={{fontSize:titleTextSize*0.28}}>
                         {dataSource?.cnName}
                     </div>
                     <div style={{display: 'flex', alignItems: 'center'}}>
@@ -107,9 +150,22 @@ const FeatureCard =React.forwardRef((props: FeatureCardProps, ref: React.Ref<HTM
                             borderRadius: '50%'
                         }}/>
                     </div>
+                    {
+                        dataSource?.type=='Item'?<div style={{textAlign:'right'}}>
+                            <Space>
+                                {dataSource.itemFeature?.wondrousItem && <div className={'item-tag'} style={{fontSize: baseTextSize*0.8,height:baseTextSize*0.8+4*0.8}}>奇物</div>}
+                                {dataSource.itemFeature?.rarity && <div className={'item-tag'} style={{fontSize: baseTextSize*0.8,height:baseTextSize*0.8+4*0.8}}>{RarityTypeOptions.find((item) => item.value === dataSource.itemFeature?.rarity)?.label}</div>}
+                                {dataSource.itemFeature?.attunement &&
+                                    <div className={'item-tag'} style={{fontSize: baseTextSize*0.8,height:baseTextSize*0.8+4*0.8}}>
+                                        需{dataSource.itemFeature?.attunementDescription}
+                                        同调
+                                    </div>}
+                            </Space>
+                        </div>:''
+                    }
                 </div>
             </div>
-                <div>
+                <div style={{fontSize: baseTextSize}}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                         {dataSource?.description}
                     </ReactMarkdown>
@@ -120,7 +176,7 @@ const FeatureCard =React.forwardRef((props: FeatureCardProps, ref: React.Ref<HTM
                 {bookIcon}
             </div>
             {
-                image.mask &&  <div style={{position:'absolute', bottom: 0, right: 0,top:0,left:0,backgroundColor:'rgba(255,255,255,0.5)',zIndex:20}}/>
+                image.mask &&  <div style={{position:'absolute', bottom: 0, right: 0,top:0,left:0,backgroundColor:bgColor,zIndex:20,opacity:0.5}}/>
             }
 
             <div style={{position:'absolute',

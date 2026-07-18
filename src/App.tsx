@@ -1,17 +1,26 @@
 import './App.css'
 import {Button, ConfigProvider, Menu, Spin, theme, Tooltip} from "antd";
 import useTheme from "./hooks/useTheme.ts";
-import SpellBook from "./pages/SpellBook/SpellBook.tsx";
-import { useMemo, useState} from "react";
-import {GiSpellBook} from "react-icons/gi";
+import {lazy, Suspense, useState} from "react";
+import {GiCharacter, GiSpellBook} from "react-icons/gi";
 import {MdFeaturedPlayList} from "react-icons/md";
 import {FaDragon, FaGithub} from "react-icons/fa";
-import {MonsterPage} from "./pages/Monster/MonsterPage.tsx";
-import FeaturePage from "./pages/Feature/FeaturePage.tsx";
+
 import useNotification from "antd/es/notification/useNotification";
-import { AppContext } from "./AppContext.ts";
+import {AppContext, defPageSetting} from "./AppContext.ts";
 import {useDNDBook} from "./hooks/useDNDBook.tsx";
 import {useDNDSpellSchool} from "./hooks/useDNDSpellSchool.tsx";
+import LoadingPage from "./pages/Loading/LoadingPage.tsx";
+import { RiLayout2Line } from "react-icons/ri";
+import type {PageSetting} from "./types/DataType.ts";
+import {FaShop} from "react-icons/fa6";
+
+const SpellBook = lazy(() => import('./pages/SpellBook/SpellBook'));
+const FeaturePage = lazy(() => import('./pages/Feature/FeaturePage'));
+const MonsterPage = lazy(() => import('./pages/Monster/MonsterPage'));
+const CharacterPage = lazy(() => import('./pages/Character/CharacterPage'));
+const LayoutPage = lazy(() => import('./pages/TokenLayout/LayoutPage'));
+const ShopPage = lazy(() => import('./pages/Shop/ShopPage'));
 
 
 
@@ -25,7 +34,7 @@ function App() {
     const dndBook = useDNDBook();
     const dndSpellSchool = useDNDSpellSchool();
 
-    const showPage = useMemo(() => {
+    const showPage = () => {
         switch (activePage){
             case 'SpellBook':
                 return <SpellBook/>;
@@ -33,10 +42,18 @@ function App() {
                 return <FeaturePage/>;
             case 'Bestiary':
                 return <MonsterPage />;
+            case 'Character':
+                return <CharacterPage/>;
+            case 'Layout':
+                return <LayoutPage/>;
+            case 'Shop':
+                return <ShopPage/>
             default:
                     return 404;
         }
-    }, [activePage]);
+    };
+
+    const [pageSettings, setPageSettings] = useState<PageSetting>(defPageSetting)
 
     return (
         <ConfigProvider
@@ -44,7 +61,7 @@ function App() {
                 algorithm: isDarkMode? theme.darkAlgorithm : theme.defaultAlgorithm,
             }}
         >
-            <AppContext.Provider value={{notification, loading, setLoading,dndBook,dndSpellSchool}}>
+            <AppContext.Provider value={{notification, loading, setLoading,dndBook,dndSpellSchool,setting:pageSettings,setSetting:setPageSettings}}>
                 <div className={'app'}>
                     <div style={{height:'100%',display:'flex',flexDirection:'column',position:'relative'}}>
                         <Menu
@@ -52,6 +69,11 @@ function App() {
                             inlineCollapsed={true}
                             selectedKeys={[activePage]}
                             items={[
+                                {
+                                    key: 'Character',
+                                    label: '角色卡',
+                                    icon:<GiCharacter />
+                                },
                                 {
                                     key: 'SpellBook',
                                     label: '法术书',
@@ -67,6 +89,16 @@ function App() {
                                     label: '怪物',
                                     icon:<FaDragon />
                                 },
+                                {
+                                    key: 'Layout',
+                                    label: 'token排版',
+                                    icon:<RiLayout2Line />
+                                },
+                                {
+                                    key: 'Shop',
+                                    label: '商店',
+                                    icon:<FaShop />
+                                }
                             ]}
                             onClick={(item)=> {
                                 const {key}  = item
@@ -80,12 +112,11 @@ function App() {
                                         href={'https://github.com/AsterRdh/my-spell-book'} target={'_blank'}
                                 />
                             </Tooltip>
-
-
-
                         </div>
                     </div>
-                    {showPage}
+                    <Suspense fallback={<LoadingPage/>}>
+                        {showPage()}
+                    </Suspense>
                 </div>
             </AppContext.Provider>
             {message}

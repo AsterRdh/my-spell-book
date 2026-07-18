@@ -1,0 +1,304 @@
+.character-card{
+    width: max-content;
+    height: max-content;
+    font-size:  42px;
+    color:#000000;
+    font-family: '霞鹜文楷', sans-serif;
+}
+.character-card-content{
+    margin: 10px;
+    column-wrap: nowrap;
+    display: flex;
+}
+.character-card-page-right{
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 210px 118px 210px 260px;
+    overflow: hidden;
+}
+.character-card-page-left{
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 210px 260px 210px 118px;
+    overflow: hidden;
+    position: relative;
+    color: black;
+}
+.character-card-base-page{
+    display: flex;
+    align-items: baseline;
+    z-index: 10;
+    position: relative;
+}
+.character-card-page-header-icon-box{
+    text-align: center;
+    position: relative;
+}
+.character-card-page-header-icon{
+    font-size: 15rem;
+}
+.character-card-page-header-icon-level{
+    position: relative;
+    top: -3rem;
+    height: 5rem;
+    width: calc(100% - 16px);
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: black solid 8px;
+    border-radius: 1rem;
+    font-family: "Nodesto Caps Condensed", serif;
+    font-size: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-text-stroke: 2px white ;
+}
+.character-card--base-page-left{
+    flex: 1;
+    margin-left: 3rem;
+
+}
+.character-card-page-header-name{
+    font-size: 12rem;
+    font-family: "Nodesto Caps Condensed", serif;
+}
+.character-card-page-header-name2{
+    font-size: 5rem;
+    font-family: '方正吕建德行楷', serif;
+    line-height: 3rem;
+    text-align: end;
+}
+.character-card-page-header-name-box{
+    top:-130px;
+    height: 200px;
+    position: relative;
+    align-items: end;
+}
+.character-card-page-header-ability-box{
+    font-size: 15rem;
+}
+
+.character-card-page-header-ability-box-item{
+    position: relative;
+    text-align: center;
+    font-size: 4rem;
+    font-family: "Nodesto Caps Condensed", serif
+}
+
+.character-card-page-header-ability-box-item-value{
+    position: absolute;
+    top: 20px;
+    height: 175px;
+    left: 20px;
+    width: 175px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .modifier-box{
+        background-color: rgba(255, 255, 255, 0.75);
+        border: black solid 8px;
+        top: 20px;
+        height: 30%;
+        width: 50%;
+        border-radius: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 4rem;
+        font-family: "Nodesto Caps Condensed", serif;
+        -webkit-text-stroke: 2px white ;
+    }
+    .score-box{
+        background-color: rgba(255, 255, 255, 0.75);
+        border: black solid 8px;
+        height: 0;
+        flex: auto;
+        width: 90%;
+        border-radius: 15px;
+        position: relative;
+        top:-8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 6rem;
+        font-family: "Nodesto Caps Condensed", serif;
+        -webkit-text-stroke: 2px white ;
+    }
+}
+
+.character-card-page-other-attribute{
+    border-radius: 15px;
+    border: 2px solid black;
+    .other-attribute-value-box{
+        display: flex;
+    }
+    .other-attribute-icon-box{
+        height: 6rem;
+        aspect-ratio: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-left: 2px solid black;
+        font-size: 4rem;
+    }
+    .other-attribute-icon-box.first{
+        border-left: none;
+    }
+    .other-attribute-value-text-box{
+        display: flex;
+        flex: 1;
+        border-left: 2px solid black;
+        align-items: center;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        font-size: 4rem;
+        justify-content: space-around;
+    }
+    .other-attribute-value-text-box.multi-line{
+
+    }
+    .other-attribute-name-box{
+        border-top:2px solid black;
+        padding-left: 1rem;
+        font-size: 2rem;
+    }
+}
+.character-card-page-skill-box{
+    display: flex;
+    margin-top: 30px;
+    .skill-box-col{
+        flex: 1;
+        margin: 0 10px;
+        .skill-table{
+            margin-top: 20px;
+            border-width: 0 0 1px 0;
+            border-color: black;
+            border-style: solid;
+            .skill-table-title{
+                border-width: 1px 1px 0 1px !important;
+                border-color: black;
+                border-style: solid;
+                padding-left: 5px;
+
+            }
+            .skill-table-row{
+                display: flex;
+                border-width: 1px 0 0 1px;
+                border-color: black;
+                border-style: solid;
+            }
+
+            .skill-table-cell{
+                padding: 3px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 52px;
+                border-width: 0 1px 0 0;
+                border-color: black;
+                border-style: solid;
+            }
+            .radio-cell{
+                width: 52px;
+            }
+            .name-cell{
+                padding: 3px 50px;
+            }
+            .value-cell{
+                flex: 0.5
+            }
+            .other-value-cell{
+                flex: 1
+            }
+        }
+    }
+}
+
+.character-card-page-title{
+    font-family: "Nodesto Caps Condensed","方正吕建德行楷", serif;
+    font-size: 160px;
+
+}
+.character-card-page-left.proficiencies{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.character-card-proficiencies{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.character-card-proficiencies-card{
+    border: black solid 8px;
+    padding: 16px;
+    width: 100%;
+    border-radius: 48px;
+    display: flex;
+    min-height: 200px;
+    margin-bottom: 20px;
+
+    .card-title{
+        font-family: "Nodesto Caps Condensed","方正吕建德行楷", serif;
+        font-size: 64px;
+    }
+    .card-icon{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .card-content{
+        flex: 1;
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        margin-left: 20px;
+    }
+    .card-content-text{
+        flex: auto;
+        height: 0;
+        font-size: 2.2rem;
+    }
+}
+
+.character-card-equipment-wallet{
+    border: black solid 4px;
+    border-radius: 64px;
+    display: flex;
+    .wallet-title{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 32px;
+    }
+    .wallet-content{
+        flex: 1;
+        display: flex;
+    }
+    .wallet-content-item{
+        flex: 1;
+        border-left: black solid 4px;
+    }
+    .wallet-content-item-title{
+        border-bottom: black solid 4px;
+        text-align: center;
+        font-size: 32px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+    }
+    .wallet-content-item-value{
+        text-align: center;
+    }
+}
+.character-card-equipment-items{
+    margin-top: 16px;
+}

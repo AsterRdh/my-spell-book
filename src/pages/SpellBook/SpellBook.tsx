@@ -3,10 +3,10 @@ import {
     type AjaxResultType,
     type SpellType,
     type SelectOptionType,
-    type PageSetting, SizeScaling
+    type PageSetting
 } from "../../types/DataType.ts";
-import {Button, Col, Form,  InputNumber,   Select, Space} from "antd";
-import {useContext, useMemo, useState} from "react";
+import {Button, Col, ColorPicker, Form, InputNumber, Select, Space} from "antd";
+import { useContext, useMemo, useState} from "react";
 import {defaultBook, defaultData} from "./DefaultData.ts";
 
 import SpellCard from "./compoments/SpellCard.tsx";
@@ -14,7 +14,6 @@ import SpellForm from "./compoments/SpellForm.tsx";
 import './SpellBook.css'
 import BasePage from "../BasePage.tsx";
 import {AppContext} from "../../AppContext.ts";
-
 
 let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
@@ -28,9 +27,8 @@ const toURLSearchParams = <T extends mapType>(record: T) => {
 };
 type SpellBookSetting = PageSetting
 
-
 export default function SpellBook() {
-    const {notification,dndBook,dndSpellSchool} = useContext(AppContext)
+    const {notification,dndBook,dndSpellSchool,setting,setSetting} = useContext(AppContext)
 
     const [form] = useForm<SpellType>();
     const spellValues = Form.useWatch([], form);
@@ -224,9 +222,10 @@ export default function SpellBook() {
 
         }
     };
-    const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
-    const [settingForm] = useForm<SpellBookSetting>()
 
+
+    const [settingForm] = useForm<SpellBookSetting>()
+    const {pageSize} = setting;
 
     return (
         <>
@@ -234,11 +233,7 @@ export default function SpellBook() {
                 preViewRender={(ref) => {
                     return <SpellCard spell={spellValues}
                                ref={ref}
-                               dataSet={{
-                                   schools: schools,
-                                   books: books
-                               }}
-                               size={[SizeScaling[0]*pageSize[0], SizeScaling[1]*pageSize[1]]}
+                               dataSet={{schools: schools, books: books}}
                     />
                 }}
                 exportNameGetter={() => {
@@ -250,18 +245,15 @@ export default function SpellBook() {
                 preViewBottomRender={()=>{
                     return <Space>
                         <div style={{marginLeft: '1rem'}}>
-                            {pageSize[0]}×{pageSize[1]}(cm)
+                            {pageSize.width}×{pageSize.height}(cm)
                         </div>
                     </Space>
                 }}
                 settingRender={() => {
                     return<Form<SpellBookSetting>
                         form={settingForm}
-                        initialValues={{pageSize: {width: 10, height: 12.8}}}
-                        onFinish={setting=>{
-                            const {width, height} = setting.pageSize;
-                            setPageSize([width, height])
-                        }}
+                        initialValues={setting}
+                        onFinish={setting=>{setSetting(setting)}}
                     >
                         <Form.Item label="页面大小" >
                             <Space>
@@ -273,6 +265,32 @@ export default function SpellBook() {
                                 </Form.Item>
                             </Space>
                         </Form.Item>
+                        <Form.Item label={"页边距"}>
+                            <Space>
+                                <Form.Item label={'顶'} name={['pageSize','padding','top']} noStyle>
+                                    <InputNumber prefix={"顶"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'右'} name={['pageSize','padding','right']} noStyle>
+                                    <InputNumber prefix={"右"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'底'} name={['pageSize','padding','bottom']} noStyle>
+                                    <InputNumber prefix={"底"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'左'} name={['pageSize','padding','left']} noStyle>
+                                    <InputNumber prefix={"左"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                            </Space>
+
+                        </Form.Item>
+                        <Form.Item label="页面背景" name={['backgroundColor']}>
+                            <ColorPicker />
+                        </Form.Item>
+                        <Form.Item label={"主要文本字号"} name={'baseTextSize'}>
+                            <InputNumber suffix={"px"}/>
+                        </Form.Item>
+                        <Form.Item label={"标题文本字号"} name={'titleTextSize'}>
+                            <InputNumber suffix={"px"}/>
+                        </Form.Item>
                     </Form>;
                 }}
                 onSettingSave={()=>{
@@ -281,9 +299,7 @@ export default function SpellBook() {
                 }}
                 afterSettingModalOpenChange={(open) => {
                     if (!open) {
-                        settingForm.setFieldsValue({
-                            pageSize: {width: pageSize[0], height: pageSize[1]}
-                        })
+                        settingForm.setFieldsValue(setting)
                     }
                 }}
                 buttonRender={()=>{

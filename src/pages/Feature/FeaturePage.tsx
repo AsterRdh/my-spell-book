@@ -1,22 +1,18 @@
-import React, {useContext, useState} from "react";
-import {Form, Input, InputNumber, Radio, Select, Space} from "antd";
+import React, {useContext} from "react";
+import {Checkbox, ColorPicker, Form, Input, InputNumber, Radio, Select, Space} from "antd";
 import BasePage from "../BasePage.tsx";
 import FeatureCard from ".//FeatureCard.tsx";
 import {useForm} from "antd/es/form/Form";
 import type {Feature} from "./Types.ts";
-import {type PageSetting, SizeScaling} from "../../types/DataType.ts";
+import {type PageSetting, RarityTypeOptions} from "../../types/DataType.ts";
 import ImageSelector from "../../compoment/ImageSelector/ImageSelector.tsx";
 import {DefaultData} from "./DefaultData.ts";
 import {AppContext} from "../../AppContext.ts";
-
 type FeaturePageSetting=PageSetting
 
-
-
-
 const FeaturePage = () => {
-    const {dndBook} = useContext(AppContext)
-    const [pageSize, setPageSize] = useState<[number, number]>([10,12.8])
+    const {dndBook,setting,setSetting} = useContext(AppContext)
+    const {pageSize} = setting;
     const {books,bookOptions} = dndBook;
 
     const [form] = useForm<Feature>()
@@ -26,27 +22,29 @@ const FeaturePage = () => {
     const handleImport = (inputData?: string) => {
         return Promise.resolve(inputData)
     }
+    const featureType = Form.useWatch('type',form);
+    const needAttunement = Form.useWatch(['itemFeature','attunement'],form);
+
     return(
         <>
             <BasePage
                 preViewRender={(ref) => {
-                    return <FeatureCard ref={ref} dataSet={{books:books}} dataSource={featureValues} size={[SizeScaling[0]*pageSize[0], SizeScaling[1]*pageSize[1]]}/>
+                    return <FeatureCard ref={ref} dataSet={{books:books}} dataSource={featureValues}/>
                 }}
                 preViewButtonRender={() => {return [];}}
                 preViewBottomRender={()=>{
                     return <Space>
                         <div style={{marginLeft: '1rem'}}>
-                            {pageSize[0]}×{pageSize[1]}(cm)
+                            {pageSize.width}×{pageSize.height}(cm)
                         </div>
                     </Space>
                 }}
                 settingRender={() => {
                     return<Form<FeaturePageSetting>
                         form={settingForm}
-                        initialValues={{pageSize: {width: 10, height: 12.8}}}
+                        initialValues={setting}
                         onFinish={setting=>{
-                            const {width, height} = setting.pageSize;
-                            setPageSize([width, height])
+                            setSetting(setting)
                         }}
                     >
                         <Form.Item label="页面大小" >
@@ -59,6 +57,31 @@ const FeaturePage = () => {
                                 </Form.Item>
                             </Space>
                         </Form.Item>
+                        <Form.Item label={"页边距"}>
+                            <Space>
+                                <Form.Item label={'顶'} name={['pageSize','padding','top']} noStyle>
+                                    <InputNumber prefix={"顶"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'右'} name={['pageSize','padding','right']} noStyle>
+                                    <InputNumber prefix={"右"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'底'} name={['pageSize','padding','bottom']} noStyle>
+                                    <InputNumber prefix={"底"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'左'} name={['pageSize','padding','left']} noStyle>
+                                    <InputNumber prefix={"左"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                            </Space>
+                        </Form.Item>
+                        <Form.Item label="页面背景" name={['backgroundColor']}>
+                            <ColorPicker />
+                        </Form.Item>
+                        <Form.Item label={"主要文本字号"} name={'baseTextSize'}>
+                            <InputNumber suffix={"px"}/>
+                        </Form.Item>
+                        <Form.Item label={"标题文本字号"} name={'titleTextSize'}>
+                            <InputNumber suffix={"px"}/>
+                        </Form.Item>
                     </Form>;
                 }}
                 onSettingSave={()=>{
@@ -67,9 +90,7 @@ const FeaturePage = () => {
                 }}
                 afterSettingModalOpenChange={(open) => {
                     if (!open) {
-                        settingForm.setFieldsValue({
-                            pageSize: {width: pageSize[0], height: pageSize[1]}
-                        })
+                        settingForm.setFieldsValue(setting)
                     }
                 }}
                 buttonRender={function (): React.ReactNode | React.ReactNode[] {return []}}
@@ -98,6 +119,7 @@ const FeaturePage = () => {
                         <Radio.Group options={[
                             {label: '能力', value: 'Ability'},
                             {label: '专长', value: 'Feats'},
+                            {label: '物品', value: 'Item'},
                         ]}/>
                     </Form.Item>
                     <Form.Item label={"英文名称"} name={"name"}>
@@ -106,6 +128,21 @@ const FeaturePage = () => {
                     <Form.Item label={"名称"} name={"cnName"}>
                         <Input/>
                     </Form.Item>
+                    <Form.Item label={"物品特性"} hidden={featureType !== 'Item'}>
+                        <Form.Item label={"奇物"} name={["itemFeature","wondrousItem"]} valuePropName="checked">
+                            <Checkbox/>
+                        </Form.Item>
+                        <Form.Item label={"稀有度"} name={["itemFeature","rarity"]} >
+                            <Select options={RarityTypeOptions} />
+                        </Form.Item>
+                        <Form.Item label={"需要同调"} name={["itemFeature","attunement"]} valuePropName="checked">
+                            <Checkbox/>
+                        </Form.Item>
+                        <Form.Item label={"需要同调描述"} name={["itemFeature","attunementDescription"]} hidden={!needAttunement}>
+                            <Input/>
+                        </Form.Item>
+
+                    </Form.Item>
                     <Form.Item label={"描述(支持 Markdown 格式)"} name={"description"} layout={'vertical'}>
                         <Input.TextArea rows={10}/>
                     </Form.Item>
@@ -113,7 +150,7 @@ const FeaturePage = () => {
                         <ImageSelector name={['image']} value={featureValues?.image}/>
                     </Form.Item>
                     <Form.Item label={"来源"} name={'fromBook'}>
-                        <Select options={bookOptions} showSearch={true}/>
+                        <Select options={bookOptions} showSearch={true} allowClear/>
                     </Form.Item>
                 </Form>
             </BasePage>

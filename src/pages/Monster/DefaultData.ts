@@ -7,7 +7,7 @@ export const DefaultData:Monster={
     cnName:'渡鸦',
     type:'Beast',
     size:'Tiny',
-    level:0,
+    level:"0",
     xp:10,
     alignment:undefined,
     ac:12,

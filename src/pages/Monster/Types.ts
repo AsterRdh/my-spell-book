@@ -30,7 +30,7 @@ export type Monster={
     cnName?:string
     type?:MonsterType
     size?:MonsterSize
-    level?:number
+    level?:string
     xp?:number
     alignment?:Alignment
     ac?: number
