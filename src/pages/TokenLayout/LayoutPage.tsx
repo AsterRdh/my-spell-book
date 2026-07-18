@@ -1,7 +1,10 @@
+
 export default function LayoutPage(){
     return(
         <div>
-            12
+            <div className={'working'}>
+                制作中
+            </div>
         </div>
     )
 }

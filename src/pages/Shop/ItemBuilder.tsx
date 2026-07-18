@@ -1,8 +1,8 @@
-import {Button, Checkbox, Col, Divider, Form, Input, InputNumber, Radio, Row, Select, Space, Tag} from "antd";
+import {Button, Checkbox, Col, Divider, Drawer, Form, Input, InputNumber, Radio, Row, Select, Space, Tag} from "antd";
 import type {Item, ItemComponentRule, ItemComponentRuleType, UnitFormula, UnitValue} from "./Types.ts";
 import {useForm, useWatch} from "antd/es/form/Form";
 import {ItemComponentRuleTypeOptions, ItemRarities, priceUnit, tags, weightUnit} from "./DemoData.ts";
-import React, {useEffect, useMemo, useState} from "react";
+import React, {forwardRef, useEffect, useImperativeHandle, useMemo, useState} from "react";
 import type { DefaultOptionType} from "@rc-component/select/lib/Select";
 import {RiDeleteRow} from "react-icons/ri";
 import {GoNumber} from "react-icons/go";
@@ -355,8 +355,27 @@ const UnitValuesFormulaInput=(props:UnitValuesFormulaInputProps)=>{
     )
 }
 
-const ItemBuilder=()=>{
+
+type ItemBuilderProps={
+
+}
+
+export type ItemBuilderRef={
+    open:(initialValues?:Item)=>void
+}
+
+
+const ItemBuilder=forwardRef<ItemBuilderRef, ItemBuilderProps>((_, ref)=>{
     const [itemForm]=useForm<Item>()
+    const [showItemBuilder, setShowItemBuilder] = useState(false)
+
+    useImperativeHandle(ref, () => ({
+        open: (initialValues?:Item) => {
+            itemForm.resetFields()
+            if (initialValues) itemForm.setFieldsValue(initialValues)
+            setShowItemBuilder(true)
+        },
+    }));
 
     const isMagicItem = useWatch('isMagicItem',itemForm)
     const needAttunement = useWatch('needAttunement',itemForm)
@@ -378,120 +397,53 @@ const ItemBuilder=()=>{
     const [itemValue, setItemValue] = useState<string>()
 
     return (
-        <div className={'item-builder'}>
-            <Button onClick={()=>itemForm.submit()}> save </Button>
-            <Form<Item> form={itemForm} onFinish={(values)=>{setItemValue(JSON.stringify(values))}}>
+        <Drawer open={showItemBuilder} title="物品生成器"
+                onClose={()=>setShowItemBuilder(false)}
+                size={720}
+                extra={ <Space>
+                    <Button type={'primary'} onClick={()=>itemForm.submit()}> 保存 </Button>
+                </Space>}
+        >
+            <div className={'item-builder'}>
+                <Form<Item> form={itemForm} onFinish={(values)=>{setItemValue(JSON.stringify(values))}}>
 
-                <Form.Item name={['id']} label={"ID"}>
-                    <Input/>
-                </Form.Item>
-                <Form.Item name={['name']} label={"名称"}>
-                    <Input/>
-                </Form.Item>
-                <Form.Item name={['cnName']} label={"中文名称"}>
-                    <Input/>
-                </Form.Item>
-                <Form.Item name={['rarity']} label={"稀有度"}>
-                    <Select options={ItemRarities}
-                            showSearch={{ optionFilterProp: 'label' }}
+                    <Form.Item name={['id']} label={"ID"}>
+                        <Input/>
+                    </Form.Item>
+                    <Form.Item name={['name']} label={"名称"}>
+                        <Input/>
+                    </Form.Item>
+                    <Form.Item name={['cnName']} label={"中文名称"}>
+                        <Input/>
+                    </Form.Item>
+                    <Form.Item name={['rarity']} label={"稀有度"}>
+                        <Select options={ItemRarities}
+                                showSearch={{ optionFilterProp: 'label' }}
 
-                    />
-                </Form.Item>
-                <Form.Item name={['tag']} label={"标签"}>
-                    <Select options={tags} mode={"tags"}/>
-                </Form.Item>
-                <Form.Item name={'isMagicItem'} label={'魔法物品'} valuePropName={'checked'}>
-                    <Checkbox />
-                </Form.Item>
-                <Form.Item name={'needAttunement'} label={'需要同调'} valuePropName={'checked'} hidden={!isMagicItem}>
-                    <Checkbox />
-                </Form.Item>
-                <Form.Item name={'attunementDescription'} label={'同调者标签'} hidden={!isMagicItem||!needAttunement}>
-                    <ItemAttunementTagInput />
-                </Form.Item>
-                <Form.Item name={'isComponent'} label={'组合物品'} valuePropName={'checked'}>
-                    <Checkbox />
-                </Form.Item>
-                <Form.Item label={'物品组合规则'} hidden={!isComponent}>
-                    <Form.List name={['component','rule']}>
-                        {(fields,  {add, remove})=>{
-                            return [...fields.map((field,index)=>{
-                                return(
-                                    <Form.Item {...field} key={'component'+field.key} >
-                                        <ItemComponentRuleInput {...field} index={index} remove={remove}/>
-                                    </Form.Item>
-                                )
-                            }),(
-                                <Form.Item>
-                                    <Button onClick={add}>添加</Button>
-                                </Form.Item>
-                            )]
-                        }}
-                    </Form.List>
-                </Form.Item>
-                <Form.Item label={'重量'}>
-                    <Form.Item label={'公式'} name={['component','weight','ifFormula']} hidden={!isComponent} valuePropName={'checked'}>
+                        />
+                    </Form.Item>
+                    <Form.Item name={['tag']} label={"标签"}>
+                        <Select options={tags} mode={"tags"}/>
+                    </Form.Item>
+                    <Form.Item name={'isMagicItem'} label={'魔法物品'} valuePropName={'checked'}>
                         <Checkbox />
                     </Form.Item>
-                    <Form.Item hidden={isFormulaWeight}>
-                        <Form.List name={'wight'}>
-                            {(fields,  {add, remove})=>{
-                                return [...fields.map((field,index)=>{
-                                    return <Form.Item {...field} key={'class'+field.key} >
-                                        <ItemUnitValuesInput remove={remove} index={index} unitOptions={weightUnit} defUnit='lb'/>
-                                    </Form.Item>
-                                }),(
-                                    <Form.Item>
-                                        <Button onClick={add}>添加</Button>
-                                    </Form.Item>
-                                )]
-                            }}
-                        </Form.List>
-                    </Form.Item>
-
-                    <Form.Item hidden={!isFormulaWeight}>
-                        <Form.List name={['component','weight','formula']} >
-                            {(fields,  {add, remove})=>{
-                                return [...fields.map((field,index)=>{
-                                    return <Form.Item {...field} key={'weight-formula'+field.key} >
-                                        <UnitValuesFormulaInput {...field} index={index} remove={remove}  unitOptions={weightUnit} defUnit='lb'/>
-                                    </Form.Item>
-                                }),(
-                                    <Form.Item>
-                                        <Button onClick={add}>添加</Button>
-                                    </Form.Item>
-                                )]
-                            }}
-                        </Form.List>
-                    </Form.Item>
-                </Form.Item>
-                <Form.Item label={'价格'}>
-                    <Form.Item label={'公式'} name={['component','price','ifFormula']} hidden={!isComponent} valuePropName={'checked'}>
+                    <Form.Item name={'needAttunement'} label={'需要同调'} valuePropName={'checked'} hidden={!isMagicItem}>
                         <Checkbox />
                     </Form.Item>
-                    <Form.Item hidden={isFormulaPrice}>
-                        <Form.List name={'price'} >
-                            {(fields,  {add, remove})=>{
-                                return [...fields.map((field,index)=>{
-                                    return <Form.Item {...field} key={'class'+field.key} >
-                                        <ItemUnitValuesInput remove={remove} index={index} unitOptions={priceUnit} defUnit='gp'/>
-                                    </Form.Item>
-                                }),(
-                                    <Form.Item>
-                                        <Button onClick={add}>添加</Button>
-                                    </Form.Item>
-                                )]
-                            }}
-                        </Form.List>
+                    <Form.Item name={'attunementDescription'} label={'同调者标签'} hidden={!isMagicItem||!needAttunement}>
+                        <ItemAttunementTagInput />
                     </Form.Item>
-
-                    <Form.Item hidden={!isFormulaPrice}>
-                        <Form.List name={['component','price','formula']} >
+                    <Form.Item name={'isComponent'} label={'组合物品'} valuePropName={'checked'}>
+                        <Checkbox />
+                    </Form.Item>
+                    <Form.Item label={'物品组合规则'} hidden={!isComponent}>
+                        <Form.List name={['component','rule']}>
                             {(fields,  {add, remove})=>{
                                 return [...fields.map((field,index)=>{
-                                    return (
-                                        <Form.Item {...field} key={'price-formula'+field.key} >
-                                            <UnitValuesFormulaInput {...field} index={index} remove={remove}  unitOptions={priceUnit} defUnit='gp'/>
+                                    return(
+                                        <Form.Item {...field} key={'component'+field.key} >
+                                            <ItemComponentRuleInput {...field} index={index} remove={remove}/>
                                         </Form.Item>
                                     )
                                 }),(
@@ -502,13 +454,90 @@ const ItemBuilder=()=>{
                             }}
                         </Form.List>
                     </Form.Item>
-                </Form.Item>
-            </Form>
-            <div>
-                {itemValue}
+                    <Form.Item label={'重量'}>
+                        <Form.Item label={'公式'} name={['component','weight','ifFormula']} hidden={!isComponent} valuePropName={'checked'}>
+                            <Checkbox />
+                        </Form.Item>
+                        <Form.Item hidden={isFormulaWeight}>
+                            <Form.List name={'wight'}>
+                                {(fields,  {add, remove})=>{
+                                    return [...fields.map((field,index)=>{
+                                        return <Form.Item {...field} key={'class'+field.key} >
+                                            <ItemUnitValuesInput remove={remove} index={index} unitOptions={weightUnit} defUnit='lb'/>
+                                        </Form.Item>
+                                    }),(
+                                        <Form.Item>
+                                            <Button onClick={add}>添加</Button>
+                                        </Form.Item>
+                                    )]
+                                }}
+                            </Form.List>
+                        </Form.Item>
+
+                        <Form.Item hidden={!isFormulaWeight}>
+                            <Form.List name={['component','weight','formula']} >
+                                {(fields,  {add, remove})=>{
+                                    return [...fields.map((field,index)=>{
+                                        return <Form.Item {...field} key={'weight-formula'+field.key} >
+                                            <UnitValuesFormulaInput {...field} index={index} remove={remove}  unitOptions={weightUnit} defUnit='lb'/>
+                                        </Form.Item>
+                                    }),(
+                                        <Form.Item>
+                                            <Button onClick={add}>添加</Button>
+                                        </Form.Item>
+                                    )]
+                                }}
+                            </Form.List>
+                        </Form.Item>
+                    </Form.Item>
+                    <Form.Item label={'价格'}>
+                        <Form.Item label={'公式'} name={['component','price','ifFormula']} hidden={!isComponent} valuePropName={'checked'}>
+                            <Checkbox />
+                        </Form.Item>
+                        <Form.Item hidden={isFormulaPrice}>
+                            <Form.List name={'price'} >
+                                {(fields,  {add, remove})=>{
+                                    return [...fields.map((field,index)=>{
+                                        return <Form.Item {...field} key={'class'+field.key} >
+                                            <ItemUnitValuesInput remove={remove} index={index} unitOptions={priceUnit} defUnit='gp'/>
+                                        </Form.Item>
+                                    }),(
+                                        <Form.Item>
+                                            <Button onClick={add}>添加</Button>
+                                        </Form.Item>
+                                    )]
+                                }}
+                            </Form.List>
+                        </Form.Item>
+
+                        <Form.Item hidden={!isFormulaPrice}>
+                            <Form.List name={['component','price','formula']} >
+                                {(fields,  {add, remove})=>{
+                                    return [...fields.map((field,index)=>{
+                                        return (
+                                            <Form.Item {...field} key={'price-formula'+field.key} >
+                                                <UnitValuesFormulaInput {...field} index={index} remove={remove}  unitOptions={priceUnit} defUnit='gp'/>
+                                            </Form.Item>
+                                        )
+                                    }),(
+                                        <Form.Item>
+                                            <Button onClick={add}>添加</Button>
+                                        </Form.Item>
+                                    )]
+                                }}
+                            </Form.List>
+                        </Form.Item>
+                    </Form.Item>
+                    <Form.Item label={'描述'} name={'description'}>
+                        <Input.TextArea/>
+                    </Form.Item>
+                </Form>
+                <div>
+                    {itemValue}
+                </div>
             </div>
-        </div>
+        </Drawer>
     )
 
-}
+})
 export default  ItemBuilder
