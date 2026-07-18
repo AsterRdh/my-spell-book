@@ -72,9 +72,17 @@ export type AjaxResultType<E>={
 export type PageSetting = {
     pageSize: {
         width: number,
-        height: number
+        height: number,
+        padding:{
+            left:number,
+            right:number,
+            top:number,
+            bottom:number
+        }
+
     },
     backgroundColor: SingleValueType,
     titleTextSize: number
+    baseTextSize:number
 }
 export const SizeScaling=[125,125]

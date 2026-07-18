@@ -265,8 +265,31 @@ export default function SpellBook() {
                                 </Form.Item>
                             </Space>
                         </Form.Item>
+                        <Form.Item label={"页边距"}>
+                            <Space>
+                                <Form.Item label={'顶'} name={['pageSize','padding','top']} noStyle>
+                                    <InputNumber prefix={"顶"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'右'} name={['pageSize','padding','right']} noStyle>
+                                    <InputNumber prefix={"右"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'底'} name={['pageSize','padding','bottom']} noStyle>
+                                    <InputNumber prefix={"底"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                                <Form.Item label={'左'} name={['pageSize','padding','left']} noStyle>
+                                    <InputNumber prefix={"左"} suffix={"cm"} min={0}/>
+                                </Form.Item>
+                            </Space>
+
+                        </Form.Item>
                         <Form.Item label="页面背景" name={['backgroundColor']}>
                             <ColorPicker />
+                        </Form.Item>
+                        <Form.Item label={"主要文本字号"} name={'baseTextSize'}>
+                            <InputNumber suffix={"px"}/>
+                        </Form.Item>
+                        <Form.Item label={"标题文本字号"} name={'titleTextSize'}>
+                            <InputNumber suffix={"px"}/>
                         </Form.Item>
                     </Form>;
                 }}

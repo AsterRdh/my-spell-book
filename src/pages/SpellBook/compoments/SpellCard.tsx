@@ -28,10 +28,20 @@ type SpellCardProps = {
 const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
     const {spell,dataSet:{schools,books}} = props;
 
-    const {setting:{pageSize,backgroundColor}} = useContext(AppContext)
+    const {setting:{pageSize,backgroundColor,titleTextSize,baseTextSize}} = useContext(AppContext)
     const cardSize:[number, number] = useMemo(() => {
         return [SizeScaling[0]*pageSize.width, SizeScaling[1]*pageSize.height]
     }, [pageSize]);
+
+    const cardPadding:[number, number, number, number] = useMemo(() => {
+        return [
+            SizeScaling[1]*pageSize.padding.top,
+            SizeScaling[0]*pageSize.padding.right,
+            SizeScaling[1]*pageSize.padding.bottom,
+            SizeScaling[0]*pageSize.padding.left,
+
+        ]
+    }, [pageSize.padding]);
 
     const bgColor = useMemo(() => {
         console.log(backgroundColor)
@@ -84,16 +94,23 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
     }, [books, spell]);
 
     return (
-        <div className={'spell-card'} ref={ref} style={{width: cardSize[0], height: cardSize[1],maxWidth:cardSize[0], maxHeight:cardSize[1],backgroundColor: bgColor}}>
+        <div className={'spell-card'} ref={ref} style={{
+            width: cardSize[0], height: cardSize[1],maxWidth:cardSize[0], maxHeight:cardSize[1],backgroundColor: bgColor,
+            paddingTop:cardPadding[0],
+            paddingRight:cardPadding[1],
+            paddingBottom:cardPadding[2],
+            paddingLeft:cardPadding[3],
+
+        }}>
             <div className={'spell-card-title-box'}>
-                <div className={'first-litter'}>
+                <div className={'first-litter'} style={{fontSize:titleTextSize,width:titleTextSize*0.925}}>
                     {spellCardTitle[0]}
                 </div>
                 <div style={{flex: 1, paddingTop: '4px'}}>
-                    <div className={'spell-name'}>
+                    <div className={'spell-name'} style={{fontSize:titleTextSize*0.315}}>
                         {spellCardTitle[1]}
                     </div>
-                    <div className={'spell-cn-name'}>
+                    <div className={'spell-cn-name'} style={{fontSize:titleTextSize*0.28}}>
                         {spell?.cnName}
                     </div>
                     <div style={{display: 'flex', alignItems: 'center'}}>
@@ -118,44 +135,44 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
                         marginTop: '8px',
                         marginRight: '8px'
                     }}>
-                        <div style={{display: 'flex', alignItems: 'center',position: 'relative'}}>
+                        <div style={{display: 'flex', alignItems: 'center',position: 'relative',fontSize:titleTextSize*0.11}}>
                             <GiClockwork/>{spell?.castingTime}
-                            <div style={{position: 'absolute', top: 46, left: '0',fontSize: '20px',width:'300px'}}>
+                            <div style={{position: 'absolute', top: titleTextSize*0.115+2, left: '0',fontSize: titleTextSize*0.06,width:'300px'}}>
                                 {spell?.castingTimePS}
                             </div>
                         </div>
-                        <div style={{display: 'flex', alignItems: 'center',position: 'relative'}}>
+                        <div style={{display: 'flex', alignItems: 'center',position: 'relative',fontSize:titleTextSize*0.11}}>
                             <GiArcheryTarget/>{spell?.range}
-                            <div style={{position: 'absolute', top: 46, left: '0',fontSize: '20px',width:'300px'}}>
+                            <div style={{position: 'absolute', top: titleTextSize*0.115+2, left: '0',fontSize:titleTextSize*0.06,width:'300px'}}>
                                 {spell?.rangePS}
                             </div>
                         </div>
-                        <div style={{display: 'flex', alignItems: 'center',position: 'relative'}}>
+                        <div style={{display: 'flex', alignItems: 'center',position: 'relative',fontSize:titleTextSize*0.11}}>
                             <GiSandsOfTime/>{spell?.duration}
-                            <div style={{position: 'absolute', top: 46, left: '0',fontSize: '20px',width:'300px'}}>
+                            <div style={{position: 'absolute', top: titleTextSize*0.115+2, left: '0',fontSize: titleTextSize*0.06,width:'300px'}}>
                                 {spell?.durationPS}
                             </div>
                         </div>
                     </div>
-                    <div style={{ textAlign: 'right', marginRight: '32px', marginTop: '8px'}}>
+                    <div style={{ textAlign: 'right', marginRight: '32px', marginTop: (spell?.durationPS || spell?.rangePS || spell?.castingTimePS) ?titleTextSize*0.075+2: '8px'}}>
                         <Space>
                             {
                                 spell?.needVerbal && (
-                                    <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <div style={{display: 'flex', alignItems: 'center',fontSize: titleTextSize*0.125}}>
                                         <GiLips/>语言
                                     </div>
                                 )
                             }
                             {
                                 spell?.needSomatic && (
-                                    <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <div style={{display: 'flex', alignItems: 'center',fontSize: titleTextSize*0.125}}>
                                         <GiSensuousness/> 姿势
                                     </div>
                                 )
                             }
                             {
                                 spell?.needMaterial && (
-                                    <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <div style={{display: 'flex', alignItems: 'center',fontSize: titleTextSize*0.125}}>
                                         <GiChest/>材料
                                     </div>
                                 )
@@ -164,16 +181,16 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
                     </div>
                     <div style={{
                         textAlign: 'right',
-                        fontSize: '24px',
+                        fontSize:titleTextSize*0.07,
                         marginRight: '32px',
-                        marginTop: '16px',
+                        marginTop: titleTextSize*0.04,
                         minHeight: '1rem'
                     }}>
                         {spell?.needMaterial && spell.material }
                     </div>
                 </div>
             </div>
-            <div style={{flex:1,fontSize: '42px'}}>
+            <div style={{flex:1,fontSize: baseTextSize}}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                     {spell?.baseDescription}
                 </ReactMarkdown>
@@ -182,10 +199,10 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
             {
                 spell?.upgradeDescription &&
                 <div>
-                    <div style={{fontWeight: 'bold',fontSize: '46px'}}>
+                    <div style={{fontWeight: 'bold',fontSize: baseTextSize*1.1}}>
                         升环施法效应:
                     </div>
-                    <div style={{minHeight: '240px',fontSize: '42px'}}>
+                    <div style={{minHeight: '240px',fontSize: baseTextSize}}>
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                             {spell?.upgradeDescription}
                         </ReactMarkdown>
@@ -195,10 +212,10 @@ const SpellCard =forwardRef<HTMLDivElement,SpellCardProps>((props,ref)=>{
             <div style={{position:'absolute', top: 210, left: 200}}>
                 <div style={{width: '165px'}}>{schoolIcon}</div>
             </div>
-            <div style={{position:'absolute', top: 150, right: 150}}>
+            <div style={{position:'absolute', top: 150, right: 150,fontSize:baseTextSize*0.85}}>
                 {(spell?.level||0)<1?'戏法':(spell?.level+"环")}
             </div>
-            <div style={{position:'absolute', bottom: 150, right: 150}}>
+            <div style={{position:'absolute', bottom: 150, right: 150,fontSize:baseTextSize*0.65}}>
                 {bookIcon}
             </div>
         </div>

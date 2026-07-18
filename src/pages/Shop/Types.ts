@@ -31,6 +31,7 @@ export type Item={
     id?:React.Key;
     name?:string;
     cnName?:string;
+    image?:string;
     rarity?:ItemRarity;
     wight?: UnitValue[],
     price?: UnitValue[],
@@ -50,10 +51,8 @@ export type Item={
         }
         rule?:ItemComponentRule[]
     }
-
     type?:string
     tags?:string[]
-
     formBook?:string
 }
 

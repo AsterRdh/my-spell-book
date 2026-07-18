@@ -79,3 +79,16 @@ button:focus-visible {
   url('./assets/fonts/LXGWWenKai-Medium.ttf')format("truetype");
 
 }
+.working{
+  position: absolute;
+  z-index: 10000;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  font-size: 80px;
+}

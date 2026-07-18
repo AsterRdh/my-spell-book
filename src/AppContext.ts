@@ -17,9 +17,17 @@ type AppContextType = {
     setSetting: (newSetting:PageSetting)=>void
 };
 export const defPageSetting:PageSetting = {
-    pageSize:{height: 12.8, width: 10},
+    pageSize:{height: 12.8, width: 10,
+        padding:{
+            top:1.68,
+            right:0.94,
+            bottom:1.68,
+            left:2,
+        }
+    },
     backgroundColor:'#fff',
-    titleTextSize: 400
+    titleTextSize: 400,
+    baseTextSize:42
 }
 export const AppContext = React.createContext<AppContextType>({
     notification: undefined,
